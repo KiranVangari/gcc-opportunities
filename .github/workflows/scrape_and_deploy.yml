@@ -1,0 +1,37 @@
+name: Daily GCC Job Scraper
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Runs daily at 08:00 UTC (12:00 PM Gulf Standard Time)
+  workflow_dispatch: # Allows you to run the script manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  scrape_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Job Scraper
+        run: python scraper.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          commit_message: "Automated daily update of job dashboard"
