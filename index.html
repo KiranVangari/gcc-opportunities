@@ -1,0 +1,88 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>GCC Turbomachinery Job Matches</title>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+            .container { max-width: 1200px; margin: 0 auto; }
+            h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+            p { color: #7f8c8d; font-size: 0.9em; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+            th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+            th { background-color: #2c3e50; color: #fff; cursor: pointer; }
+            th:hover { background-color: #34495e; }
+            tr:hover { background-color: #f5f5f5; }
+            a { color: #3498db; text-decoration: none; font-weight: bold; }
+            a:hover { text-decoration: underline; }
+            .score-high { color: #27ae60; font-weight: bold; }
+            .score-med { color: #f39c12; font-weight: bold; }
+            .score-low { color: #e74c3c; font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Targeted GCC Job Matches: Kiran Vangari</h1>
+            <p>Last Updated: 2026-10-12 12:12 UTC</p>
+            <table id="jobTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Relevance Score ↕</th>
+                        <th onclick="sortTable(1)">Job Title ↕</th>
+                        <th onclick="sortTable(2)">Company ↕</th>
+                        <th onclick="sortTable(3)">Location ↕</th>
+                        <th>Apply Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+    
+                </tbody>
+            </table>
+        </div>
+        <script>
+            function sortTable(n) {
+                var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                table = document.getElementById("jobTable");
+                switching = true;
+                dir = "desc"; 
+                while (switching) {
+                    switching = false;
+                    rows = table.rows;
+                    for (i = 1; i < (rows.length - 1); i++) {
+                        shouldSwitch = false;
+                        x = rows[i].getElementsByTagName("TD")[n];
+                        y = rows[i + 1].getElementsByTagName("TD")[n];
+                        
+                        let xVal = x.innerHTML.toLowerCase();
+                        let yVal = y.innerHTML.toLowerCase();
+                        
+                        // Handle numeric sorting for the score column
+                        if (n === 0) {
+                            xVal = parseInt(xVal.replace('%', ''));
+                            yVal = parseInt(yVal.replace('%', ''));
+                        }
+                        
+                        if (dir == "asc") {
+                            if (xVal > yVal) { shouldSwitch = true; break; }
+                        } else if (dir == "desc") {
+                            if (xVal < yVal) { shouldSwitch = true; break; }
+                        }
+                    }
+                    if (shouldSwitch) {
+                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                        switching = true;
+                        switchcount ++;
+                    } else {
+                        if (switchcount == 0 && dir == "desc") {
+                            dir = "asc";
+                            switching = true;
+                        }
+                    }
+                }
+            }
+        </script>
+    </body>
+    </html>
+    
