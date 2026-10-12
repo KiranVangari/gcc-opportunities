@@ -25,7 +25,7 @@
     <body>
         <div class="container">
             <h1>Targeted GCC Job Matches: Kiran Vangari</h1>
-            <p>Last Updated: 2026-10-12 12:12 UTC</p>
+            <p>Last Updated: 2026-10-12 12:26 UTC</p>
             <table id="jobTable">
                 <thead>
                     <tr>
@@ -54,16 +54,16 @@
                         shouldSwitch = false;
                         x = rows[i].getElementsByTagName("TD")[n];
                         y = rows[i + 1].getElementsByTagName("TD")[n];
-                        
+
                         let xVal = x.innerHTML.toLowerCase();
                         let yVal = y.innerHTML.toLowerCase();
-                        
+
                         // Handle numeric sorting for the score column
                         if (n === 0) {
                             xVal = parseInt(xVal.replace('%', ''));
                             yVal = parseInt(yVal.replace('%', ''));
                         }
-                        
+
                         if (dir == "asc") {
                             if (xVal > yVal) { shouldSwitch = true; break; }
                         } else if (dir == "desc") {
