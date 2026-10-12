@@ -2,7 +2,7 @@ name: Daily GCC Job Scraper
 
 on:
   schedule:
-    - cron: '0 8 * * *' 
+    - cron: '0 8 */3 * *' # Runs every 3 days at 08:00 UTC to stay under the 100 API/month limit
   workflow_dispatch: 
 
 permissions:
@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4 # Updated to v4
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5 # Updated to v5
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -27,11 +27,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Job Scraper
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }} # Passes the secure API key to Python
         run: python scraper.py
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4 # Updated to v4
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
-          commit_message: "Automated daily update of job dashboard"
+          commit_message: "Automated update of job dashboard"
