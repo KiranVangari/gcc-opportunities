@@ -481,7 +481,7 @@ def get_serpapi_jobs():
 
     combined_terms = " OR ".join([f'"{term}"' for term in SEARCH_TERMS])
 
-    for location in LOCATIONS[:1]:
+    for location in LOCATIONS[:3]:
         log_print(f"Querying Google API combined terms for '{location}' (1 API Call)...")
 
         natural_query = f'({combined_terms}) jobs in {location} -linkedin -indeed'
