@@ -468,7 +468,7 @@ def get_serpapi_jobs():
 
     combined_terms = " OR ".join([f'"{term}"' for term in SEARCH_TERMS])
 
-    for location in LOCATIONS[:3]:
+    for location in LOCATIONS[:1]:
         log_print(f"Querying Google API combined terms for '{location}' (1 API Call)...")
 
         natural_query = f'({combined_terms}) jobs in {location} -linkedin -indeed'
@@ -497,13 +497,14 @@ def get_serpapi_jobs():
             data = response.json()
 
             if "error" in data:
-                if "hasn't returned any results" in data["error"]:
+                error_msg = data["error"]
+                # Catch multiple variations of 0 results/unparseable page messages gracefully
+                if "hasn't returned any results" in error_msg or "couldn't get valid results" in error_msg:
                     log_print(f"Google Jobs found 0 results for {location}.")
-                    continue
                 else:
-                    api_status = f"Failed: API Error - {data['error']}"
-                    log_print(api_status)
-                    break
+                    # Log other localized errors but DO NOT break the loop
+                    log_print(f"SerpApi localized error in {location}: {error_msg}")
+                continue 
 
             if "jobs_results" in data:
                 for job in data["jobs_results"]:
