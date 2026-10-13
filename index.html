@@ -7,9 +7,12 @@
         <title>GCC Turbomachinery Job Matches</title>
         <style>
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 20px; color: #333; }
-            .container { max-width: 1500px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+            .container { max-width: 1500px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
             h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 0; }
+            .summary-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
             .summary-text { font-size: 1.1em; font-weight: bold; color: #2c3e50; margin: 0; }
+            .export-btn { background-color: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+            .export-btn:hover { background-color: #2ecc71; }
             .filter-bar { display: flex; gap: 15px; margin: 20px 0; padding: 15px; background-color: #f1f3f5; border-radius: 8px; align-items: center; flex-wrap: wrap; }
             .filter-group { display: flex; flex-direction: column; }
             .filter-group label { font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: 5px; }
@@ -38,63 +41,69 @@
             .metadata-box summary { cursor: pointer; color: #3498db; font-size: 1.2em; font-weight: bold; outline: none; list-style-position: inside; }
             .metadata-box summary:hover { color: #5dade2; }
             .metadata-box pre { margin-top: 15px; padding-top: 15px; border-top: 1px solid #34495e; overflow-x: auto; }
+            .raw-section { margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; }
+            .raw-section summary { cursor: pointer; color: #e67e22; font-size: 1.3em; font-weight: bold; outline: none; }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>GCC Turbomachinery & Reliability Jobs (72 Hours)</h1>
+            <h1>GCC Turbomachinery & Reliability Jobs</h1>
 
-            <p class="summary-text">Total Jobs Found: <span style="color: #3498db; font-size: 1.2em;">11</span></p>
-            <p style="margin: 5px 0 15px 0; font-size: 0.85em; color: #6c757d;">Last Updated: 2026-10-13 02:37 PM UAE</p>
+            <div class="summary-header">
+                <div>
+                    <p class="summary-text">Highly Relevant Jobs: <span style="color: #3498db; font-size: 1.2em;">4</span></p>
+                    <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #6c757d;">Last Updated: 2026-10-13 04:18 PM UAE</p>
+                </div>
+                <button class="export-btn" onclick="exportTableToCSV('jobTable', 'Highly_Relevant_Jobs.csv')">📥 Export to Excel</button>
+            </div>
 
             <div class="filter-bar">
                 <div class="filter-group">
                     <label>Engine Filter</label>
-                    <select id="engineFilter" onchange="applyFilters()"><option value="all">All Engines</option></select>
+                    <select id="engineFilter" onchange="applyFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')"><option value="all">All Engines</option></select>
                 </div>
                 <div class="filter-group">
                     <label>Portal Filter</label>
-                    <select id="portalFilter" onchange="applyFilters()"><option value="all">All Portals</option></select>
+                    <select id="portalFilter" onchange="applyFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')"><option value="all">All Portals</option></select>
                 </div>
                 <div class="filter-group">
                     <label>Company Filter</label>
-                    <select id="companyFilter" onchange="applyFilters()"><option value="all">All Companies</option></select>
+                    <select id="companyFilter" onchange="applyFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')"><option value="all">All Companies</option></select>
                 </div>
                 <div class="filter-group">
                     <label>Country Filter</label>
-                    <select id="countryFilter" onchange="applyFilters()"><option value="all">All Countries</option></select>
+                    <select id="countryFilter" onchange="applyFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')"><option value="all">All Countries</option></select>
                 </div>
-                <button onclick="resetFilters()" style="margin-top: 18px; padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset Filters</button>
+                <button onclick="resetFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')" style="margin-top: 18px; padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset Filters</button>
             </div>
 
             <table id="jobTable">
                 <thead>
                     <tr>
-                        <th onclick="sortTable(0)">S.No ↕</th>
-                        <th onclick="sortTable(1)">Engine ↕</th>
-                        <th onclick="sortTable(2)">Portal ↕</th>
-                        <th onclick="sortTable(3)">Date Posted ↕</th>
-                        <th onclick="sortTable(4)">Search Term ↕</th>
-                        <th onclick="sortTable(5)">Job Title ↕</th>
-                        <th onclick="sortTable(6)">Company ↕</th>
-                        <th onclick="sortTable(7)">City ↕</th>
-                        <th onclick="sortTable(8)">Country ↕</th>
+                        <th onclick="sortTable('jobTable', 0)">S.No ↕</th>
+                        <th onclick="sortTable('jobTable', 1)">Search Engine ↕</th>
+                        <th onclick="sortTable('jobTable', 2)">Job's Portal ↕</th>
+                        <th onclick="sortTable('jobTable', 3)">Date Posted ↕</th>
+                        <th onclick="sortTable('jobTable', 4)">Job Title ↕</th>
+                        <th onclick="sortTable('jobTable', 5)">Company ↕</th>
+                        <th onclick="sortTable('jobTable', 6)">City ↕</th>
+                        <th onclick="sortTable('jobTable', 7)">Country ↕</th>
                         <th>Link</th>
                     </tr>
                 </thead>
                 <tbody>
-    
+                    
                     <tr>
                         <td>1</td>
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
                         <td>2026-10-13</td>
-                        <td><span class="term-badge">Rotating Equipment</span></td>
-                        <td style="font-weight: 500;">Area Maintenance Head (Refinery)</td>
+                        
+                        <td style="font-weight: 500;">Specialist Engineer (Reliability)</td>
                         <td class="company-cell">Trinzic</td>
-                        <td>الخبر, S04</td>
-                        <td class="country-cell">Saudi Arabia</td>
-                        <td><a href="https://sa.indeed.com/viewjob?jk=d5767d035c1ab90e" target="_blank" class="apply-btn">View</a></td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=c4a0ca5f2cf0e941" target="_blank" class="apply-btn">View</a></td>
                     </tr>
         
                     <tr>
@@ -102,12 +111,12 @@
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
                         <td>2026-10-13</td>
-                        <td><span class="term-badge">Rotating Equipment</span></td>
-                        <td style="font-weight: 500;">Reliability Engineer</td>
+                        
+                        <td style="font-weight: 500;">Senior Engineer (Reliability)</td>
                         <td class="company-cell">Trinzic</td>
-                        <td>الجبيل, S04</td>
-                        <td class="country-cell">Saudi Arabia</td>
-                        <td><a href="https://sa.indeed.com/viewjob?jk=d98413af8877e56d" target="_blank" class="apply-btn">View</a></td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=e28cba1cff811e85" target="_blank" class="apply-btn">View</a></td>
                     </tr>
         
                     <tr>
@@ -115,7 +124,7 @@
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
                         <td>2026-10-13</td>
-                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        
                         <td style="font-weight: 500;">Engineer (Reliability)</td>
                         <td class="company-cell">Trinzic</td>
                         <td>Abu Dhabi, AZ</td>
@@ -127,17 +136,200 @@
                         <td>4</td>
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        
+                        <td style="font-weight: 500;">Mechanic</td>
+                        <td class="company-cell">Knauf MEASA</td>
+                        <td>Ras al-Khaimah, RK</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=a7484eb1850e8bc1" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                </tbody>
+            </table>
+
+
+            <!-- RAW JOBS SECTION -->
+            <details class="raw-section">
+                <summary>Unfiltered Raw Jobs Listing (Click to Expand)</summary>
+                <div style="margin-top: 20px;">
+                    <div class="summary-header">
+                        <div>
+                            <p class="summary-text">Raw Jobs Found: <span style="color: #e67e22; font-size: 1.2em;">55</span></p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #6c757d;">Jobs pulled before strict boolean guillotine applied.</p>
+                        </div>
+                        <button class="export-btn" onclick="exportTableToCSV('rawJobTable', 'Raw_Unfiltered_Jobs.csv')">📥 Export Raw to Excel</button>
+                    </div>
+
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>Engine Filter</label>
+                            <select id="rawEngineFilter" onchange="applyFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')"><option value="all">All Engines</option></select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Portal Filter</label>
+                            <select id="rawPortalFilter" onchange="applyFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')"><option value="all">All Portals</option></select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Company Filter</label>
+                            <select id="rawCompanyFilter" onchange="applyFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')"><option value="all">All Companies</option></select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Country Filter</label>
+                            <select id="rawCountryFilter" onchange="applyFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')"><option value="all">All Countries</option></select>
+                        </div>
+                        <button onclick="resetFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')" style="margin-top: 18px; padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset Filters</button>
+                    </div>
+
+                    <table id="rawJobTable">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('rawJobTable', 0)">S.No ↕</th>
+                                <th onclick="sortTable('rawJobTable', 1)">Search Engine ↕</th>
+                                <th onclick="sortTable('rawJobTable', 2)">Job's Portal ↕</th>
+                                <th onclick="sortTable('rawJobTable', 3)">Date Posted ↕</th>
+                                <th onclick="sortTable('rawJobTable', 4)">Search Term ↕</th>
+                                <th onclick="sortTable('rawJobTable', 5)">Job Title ↕</th>
+                                <th onclick="sortTable('rawJobTable', 6)">Company ↕</th>
+                                <th onclick="sortTable('rawJobTable', 7)">City ↕</th>
+                                <th onclick="sortTable('rawJobTable', 8)">Country ↕</th>
+                                <th>Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                    <tr>
+                        <td>1</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
                         <td>2026-10-13</td>
-                        <td><span class="term-badge">Reliability Engineer</span></td>
-                        <td style="font-weight: 500;">Senior Engineer (Reliability)</td>
-                        <td class="company-cell">Trinzic</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Paramedic-Naoero Deployment</td>
+                        <td class="company-cell">Global Mission Support Services LLC</td>
+                        <td>Dubai, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=447afa00ec02cc56" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>2</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Fire Watcher - One Month Temporary Project</td>
+                        <td class="company-cell">Bros Mastermind Events Dubai</td>
                         <td>Abu Dhabi, AZ</td>
                         <td class="country-cell">United Arab Emirates</td>
-                        <td><a href="https://ae.indeed.com/viewjob?jk=e28cba1cff811e85" target="_blank" class="apply-btn">View</a></td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=6fe72246f33cbba3" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>3</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Engineer, Inspection (MERAM - Inspection Team - (Habshan 5))</td>
+                        <td class="company-cell">ADNOC Group</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478787491" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>4</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Infrastructure Engineer (Dubai)</td>
+                        <td class="company-cell">Connect Tech+Talent</td>
+                        <td>Dubai</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4477205594" target="_blank" class="apply-btn">View</a></td>
                     </tr>
         
                     <tr>
                         <td>5</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Site Reliability Engineer</td>
+                        <td class="company-cell">Atain</td>
+                        <td>Dubai</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4476404794" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>6</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Senior Engineer, Reliability (Reliability Team - Asab)</td>
+                        <td class="company-cell">ADNOC Group</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478778880" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>7</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Consultant/Specialist Family Medicine - Dubai / Global Doctors Welcome</td>
+                        <td class="company-cell">Health 7 Careers</td>
+                        <td>Dubai, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=b8366e9205525eed" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>8</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Data Engineer</td>
+                        <td class="company-cell">DICETEK LLC</td>
+                        <td>Dubai, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=42c8f5266967ff6d" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>9</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">L3 Senior Network Engineer - Malaysia</td>
+                        <td class="company-cell">TLS IT Solutionts</td>
+                        <td>Dubai, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=bad2a2ba5162003f" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>10</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Network Engineer</td>
+                        <td class="company-cell">Trustbend Logistics</td>
+                        <td>Dubai, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=fe1ec2d3ce67cfde" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>11</td>
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
                         <td>2026-10-13</td>
@@ -150,20 +342,306 @@
                     </tr>
         
                     <tr>
-                        <td>6</td>
+                        <td>12</td>
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
                         <td>2026-10-13</td>
                         <td><span class="term-badge">Reliability Engineer</span></td>
-                        <td style="font-weight: 500;">Service Manager - Central Area</td>
-                        <td class="company-cell">Atlas Copco Group</td>
-                        <td>الرياض, S01</td>
-                        <td class="country-cell">Saudi Arabia</td>
-                        <td><a href="https://sa.indeed.com/viewjob?jk=28bdedd6f66ae22f" target="_blank" class="apply-btn">View</a></td>
+                        <td style="font-weight: 500;">Senior Engineer (Reliability)</td>
+                        <td class="company-cell">Trinzic</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=e28cba1cff811e85" target="_blank" class="apply-btn">View</a></td>
                     </tr>
         
                     <tr>
-                        <td>7</td>
+                        <td>13</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Heavy Equipment Mechanical Engineer – PMV</td>
+                        <td class="company-cell">Al Ghanim International</td>
+                        <td>Dubai, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=05bb4fdb1fb70385" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>14</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Engineer (Reliability)</td>
+                        <td class="company-cell">Trinzic</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=8569152035b1b2eb" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>15</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Kubernetes Platform Engineer</td>
+                        <td class="company-cell">Oivan</td>
+                        <td>Dubai, Dubai</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4476429077" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>16</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Maintenance Supervisor (Machineries & Heavy Equipment)</td>
+                        <td class="company-cell">Azizi Developments</td>
+                        <td>Dubai</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4476094531" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>17</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">CT Solar Field Engineer - I</td>
+                        <td class="company-cell">Acwa</td>
+                        <td>N/A</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478788438" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>18</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Assistant Manager - Distribution Center</td>
+                        <td class="company-cell">Apparel Group</td>
+                        <td>N/A</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478747994" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>19</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Static and Rotating Equipment Engineer</td>
+                        <td class="company-cell">Target Engineering Construction Co LLC</td>
+                        <td>Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4476091512" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>20</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Mechanical Foreman</td>
+                        <td class="company-cell">Target Engineering Construction Co LLC</td>
+                        <td>Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4476402311" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>21</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Engineer, Inspection (Inspection Team - (Habshan & Bab))</td>
+                        <td class="company-cell">ADNOC Group</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478781763" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>22</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">CT Solar Field Engineer - I</td>
+                        <td class="company-cell">Acwa China</td>
+                        <td>N/A</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478775681" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>23</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Gas Turbine Inspector</td>
+                        <td class="company-cell">Sulzer</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4414737063" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>24</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">DevOps Engineer</td>
+                        <td class="company-cell">IFZA Dubai</td>
+                        <td>Dubai</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4477526808" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>25</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Repair Engineer</td>
+                        <td class="company-cell">TALENTMATE</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478526951" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>26</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Biomedical Engineer</td>
+                        <td class="company-cell">Everlast Wellness </td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=deed596d83ee1db0" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>27</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Electrical Engineer - Operations and Maintenance</td>
+                        <td class="company-cell">Wood</td>
+                        <td>Sharjah, Sharjah Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4461070318" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>28</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Emergency Medical Technician - Advanced</td>
+                        <td class="company-cell">NMC Health plc</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=1d52c5c29dd5ca21" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>29</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Pharmacovigilance Associate - UAE National</td>
+                        <td class="company-cell">GSK</td>
+                        <td>Dubai, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=ae4982365187b155" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>30</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Asset Controller</td>
+                        <td class="company-cell">Well Touch Medical Centre</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=b70cfea14b631303" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>31</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Quality & Reliability Manager</td>
+                        <td class="company-cell">KBR</td>
+                        <td>Dubai, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=39bf5486c60952ac" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>32</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">HSE Officer</td>
+                        <td class="company-cell">THA by ARMONIA</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=170a1d3244bec889" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>33</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Kitchen Helper</td>
+                        <td class="company-cell">FRZN</td>
+                        <td>Ras Al Khor, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=9100df4ee71419e7" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>34</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Repair Engineer</td>
+                        <td class="company-cell">Etihad Airways</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=b8b278ac227e05e4" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>35</td>
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
                         <td>2026-10-12</td>
@@ -176,113 +654,301 @@
                     </tr>
         
                     <tr>
-                        <td>8</td>
+                        <td>36</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Senior Mechanical Engineer (Static/Rotating) Offshore</td>
+                        <td class="company-cell">Penspen</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4467368910" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>37</td>
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
                         <td>2026-10-12</td>
                         <td><span class="term-badge">Rotating Equipment</span></td>
-                        <td style="font-weight: 500;">Reliability Engineer</td>
-                        <td class="company-cell">KBR</td>
-                        <td>الجبيل, S04</td>
-                        <td class="country-cell">Saudi Arabia</td>
-                        <td><a href="https://sa.indeed.com/viewjob?jk=0c6d3595543dade1" target="_blank" class="apply-btn">View</a></td>
+                        <td style="font-weight: 500;">Mechanic / Technician - AC/DC Motors & Alternators</td>
+                        <td class="company-cell">SHJ & OMAN ENG. CO. LLC</td>
+                        <td>Sharjah, SH</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=3e0d6c4ec72eff15" target="_blank" class="apply-btn">View</a></td>
                     </tr>
         
                     <tr>
-                        <td>9</td>
+                        <td>38</td>
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
-                        <td>2026-10-10</td>
-                        <td><span class="term-badge">Rotating Equipment</span></td>
-                        <td style="font-weight: 500;">Principal Rotating Engineer</td>
-                        <td class="company-cell">Worley</td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Purchase Engineer</td>
+                        <td class="company-cell">STYRO Insulation Mat. Ind. LLC</td>
                         <td>Abu Dhabi, AZ</td>
                         <td class="country-cell">United Arab Emirates</td>
-                        <td><a href="https://ae.indeed.com/viewjob?jk=87302d2a31270ba1" target="_blank" class="apply-btn">View</a></td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=6906064cfb75ddf0" target="_blank" class="apply-btn">View</a></td>
                     </tr>
         
                     <tr>
-                        <td>10</td>
+                        <td>39</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Turbomachinery</span></td>
+                        <td style="font-weight: 500;">助理财务经理 - 油气行业</td>
+                        <td class="company-cell">Cloud Nine Human Resources Consultancy LLC</td>
+                        <td>Dubai</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478394802" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>40</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Turbomachinery</span></td>
+                        <td style="font-weight: 500;">Lead Mechanic (Calibration)</td>
+                        <td class="company-cell">Emirates</td>
+                        <td>Dubai, Dubai</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4476068692" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>41</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Regional Director</td>
+                        <td class="company-cell">CB&I</td>
+                        <td>Sharjah Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478384374" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>42</td>
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
                         <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Mechatronics Engineer</td>
+                        <td class="company-cell">OPTION 1 EVENT SERVICES</td>
+                        <td>Dubai, DU</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=c47bc635cc645d9d" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>43</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Senior Technician, Mechanical Maintenance (Rotating)(DGD)</td>
+                        <td class="company-cell">ADNOC Group</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478506600" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>44</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-11</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Engineering Manager</td>
+                        <td class="company-cell">Crown Holdings, Inc.</td>
+                        <td>Dubai, Dubai</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4460822069" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>45</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-11</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Head Chef</td>
+                        <td class="company-cell">Apres Restaurant LLC</td>
+                        <td>Al-Ayn, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=b90d4257353e7538" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>46</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-11</td>
+                        <td><span class="term-badge">Turbomachinery</span></td>
+                        <td style="font-weight: 500;">Mechanic (Coiled Tubing)</td>
+                        <td class="company-cell">ADNOC Drilling</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478372106" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>47</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-11</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Senior Rotating Engineer</td>
+                        <td class="company-cell">TALENTMATE</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478300127" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>48</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-11</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Project Construction Manager</td>
+                        <td class="company-cell">DIPG</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=66cea905b38fba04" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>49</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-11</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Principal Rotating Engineer</td>
+                        <td class="company-cell">TALENTMATE</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478332192" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>50</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
                         <td>2026-10-10</td>
                         <td><span class="term-badge">Rotating Equipment</span></td>
                         <td style="font-weight: 500;">Senior Rotating Engineer</td>
                         <td class="company-cell">Worley</td>
-                        <td>Abu Dhabi, AZ</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
                         <td class="country-cell">United Arab Emirates</td>
-                        <td><a href="https://ae.indeed.com/viewjob?jk=984b13e06cece4ef" target="_blank" class="apply-btn">View</a></td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478061826" target="_blank" class="apply-btn">View</a></td>
                     </tr>
         
                     <tr>
-                        <td>11</td>
+                        <td>51</td>
                         <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
-                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
                         <td>2026-10-10</td>
                         <td><span class="term-badge">Rotating Equipment</span></td>
-                        <td style="font-weight: 500;">Principal Mechanical Static Engineer</td>
+                        <td style="font-weight: 500;">Principal Rotating Engineer</td>
                         <td class="company-cell">Worley</td>
-                        <td>Abu Dhabi, AZ</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
                         <td class="country-cell">United Arab Emirates</td>
-                        <td><a href="https://ae.indeed.com/viewjob?jk=eec4e76919865288" target="_blank" class="apply-btn">View</a></td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478062750" target="_blank" class="apply-btn">View</a></td>
                     </tr>
         
-                </tbody>
-            </table>
+                    <tr>
+                        <td>52</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-10</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Senior Sales Engineer – Oil & Gas</td>
+                        <td class="company-cell">Carrier</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4476225008" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>53</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-10</td>
+                        <td><span class="term-badge">Turbomachinery</span></td>
+                        <td style="font-weight: 500;">B2 Aircraft Maintenance Team lead - GCAA/EASA with Global & Challenger Type Rating</td>
+                        <td class="company-cell">Bombardier</td>
+                        <td>Abu Dhabi, Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4460388830" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>54</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-10</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">DevOps Engineer, Sr</td>
+                        <td class="company-cell">Globant</td>
+                        <td>N/A</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4468017186" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>55</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge linkedin">linkedin</span></td>
+                        <td>2026-10-10</td>
+                        <td><span class="term-badge">Condition Monitoring</span></td>
+                        <td style="font-weight: 500;">Director Asset Management</td>
+                        <td class="company-cell">Confidential</td>
+                        <td>Abu Dhabi Emirate</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://www.linkedin.com/jobs/view/4478085167" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                        </tbody>
+                    </table>
+                </div>
+            </details>
 
-            <div class="api-status-box status-good">
-                Google Jobs API (SerpApi) Status: Working (No Errors) | API Calls Consumed This Run: 3
-            </div>
-
+            <!-- Natively Collapsed Log Box -->
             <details class="metadata-box">
                 <summary>System Metadata & Terminal Logs (Click to Expand)</summary>
-                <pre>Starting job scrape at 2026-10-13 02:37 PM UAE...
+                
+                <div class="api-status-box status-good" style="margin-top: 15px; margin-bottom: 0;">
+                    Google Jobs API (SerpApi) Status: Working (No Errors) | API Calls Consumed This Run: 1
+                </div>
+
+                <pre>Starting job scrape at 2026-10-13 04:18 PM UAE...
 Scraping 'Rotating Equipment' in 'United Arab Emirates' (JobSpy)...
-Scraping 'Rotating Equipment' in 'Saudi Arabia' (JobSpy)...
-Scraping 'Rotating Equipment' in 'Qatar' (JobSpy)...
-Scraping 'Rotating Equipment' in 'Kuwait' (JobSpy)...
-Scraping 'Rotating Equipment' in 'Oman' (JobSpy)...
-Scraping 'Rotating Equipment' in 'Bahrain' (JobSpy)...
 Scraping 'Turbomachinery' in 'United Arab Emirates' (JobSpy)...
-Scraping 'Turbomachinery' in 'Saudi Arabia' (JobSpy)...
-Scraping 'Turbomachinery' in 'Qatar' (JobSpy)...
-Scraping 'Turbomachinery' in 'Kuwait' (JobSpy)...
-Scraping 'Turbomachinery' in 'Oman' (JobSpy)...
-Scraping 'Turbomachinery' in 'Bahrain' (JobSpy)...
 Scraping 'Reliability Engineer' in 'United Arab Emirates' (JobSpy)...
-Scraping 'Reliability Engineer' in 'Saudi Arabia' (JobSpy)...
-Scraping 'Reliability Engineer' in 'Qatar' (JobSpy)...
-Scraping 'Reliability Engineer' in 'Kuwait' (JobSpy)...
-Scraping 'Reliability Engineer' in 'Oman' (JobSpy)...
-Scraping 'Reliability Engineer' in 'Bahrain' (JobSpy)...
 Scraping 'Condition Monitoring' in 'United Arab Emirates' (JobSpy)...
-Scraping 'Condition Monitoring' in 'Saudi Arabia' (JobSpy)...
-Scraping 'Condition Monitoring' in 'Qatar' (JobSpy)...
-Scraping 'Condition Monitoring' in 'Kuwait' (JobSpy)...
-Scraping 'Condition Monitoring' in 'Oman' (JobSpy)...
-Scraping 'Condition Monitoring' in 'Bahrain' (JobSpy)...
 Scraping 'Vibration Analyst' in 'United Arab Emirates' (JobSpy)...
-Scraping 'Vibration Analyst' in 'Saudi Arabia' (JobSpy)...
-Scraping 'Vibration Analyst' in 'Qatar' (JobSpy)...
-Scraping 'Vibration Analyst' in 'Kuwait' (JobSpy)...
-Scraping 'Vibration Analyst' in 'Oman' (JobSpy)...
-Scraping 'Vibration Analyst' in 'Bahrain' (JobSpy)...
 
 Starting SerpApi Google Jobs scrape...
 Querying Google API combined terms for 'United Arab Emirates' (1 API Call)...
 Google Jobs found 0 results for United Arab Emirates.
-Querying Google API combined terms for 'Saudi Arabia' (1 API Call)...
-Google Jobs found 0 results for Saudi Arabia.
-Querying Google API combined terms for 'Qatar' (1 API Call)...
-Google Jobs found 0 results for Qatar.
-Total raw jobs collected before verification: 180
-Total jobs remaining after strict Hardware/Discipline verification: 11</pre>
+Total raw jobs collected before verification: 55
+Total jobs remaining after strict Hardware/Discipline verification: 4</pre>
             </details>
         </div>
-
         <script>
             window.onload = function() {
-                let table = document.getElementById("jobTable");
+                initFilters("jobTable", "engineFilter", "portalFilter", "companyFilter", "countryFilter");
+                initFilters("rawJobTable", "rawEngineFilter", "rawPortalFilter", "rawCompanyFilter", "rawCountryFilter");
+            };
+
+            function initFilters(tableId, engineId, portalId, companyId, countryId) {
+                let table = document.getElementById(tableId);
+                if(!table) return;
                 let tr = table.getElementsByTagName("tr");
                 let engines = new Set(), portals = new Set(), companies = new Set(), countries = new Set();
 
@@ -298,14 +964,15 @@ Total jobs remaining after strict Hardware/Discipline verification: 11</pre>
                     if (tdCountry) countries.add(tdCountry.textContent.trim());
                 }
 
-                populateSelect("engineFilter", Array.from(engines).sort());
-                populateSelect("portalFilter", Array.from(portals).sort());
-                populateSelect("companyFilter", Array.from(companies).sort());
-                populateSelect("countryFilter", Array.from(countries).sort());
-            };
+                populateSelect(engineId, Array.from(engines).sort());
+                populateSelect(portalId, Array.from(portals).sort());
+                populateSelect(companyId, Array.from(companies).sort());
+                populateSelect(countryId, Array.from(countries).sort());
+            }
 
             function populateSelect(id, items) {
                 let select = document.getElementById(id);
+                if(!select) return;
                 items.forEach(item => {
                     if(item && item !== "N/A") {
                         let opt = document.createElement("option");
@@ -316,13 +983,13 @@ Total jobs remaining after strict Hardware/Discipline verification: 11</pre>
                 });
             }
 
-            function applyFilters() {
-                let engineVal = document.getElementById("engineFilter").value;
-                let portalVal = document.getElementById("portalFilter").value;
-                let companyVal = document.getElementById("companyFilter").value;
-                let countryVal = document.getElementById("countryFilter").value;
+            function applyFilters(tableId, engineId, portalId, companyId, countryId) {
+                let engineVal = document.getElementById(engineId).value;
+                let portalVal = document.getElementById(portalId).value;
+                let companyVal = document.getElementById(companyId).value;
+                let countryVal = document.getElementById(countryId).value;
 
-                let table = document.getElementById("jobTable");
+                let table = document.getElementById(tableId);
                 let tr = table.getElementsByTagName("tr");
 
                 for (let i = 1; i < tr.length; i++) {
@@ -342,17 +1009,17 @@ Total jobs remaining after strict Hardware/Discipline verification: 11</pre>
                 }
             }
 
-            function resetFilters() {
-                document.getElementById("engineFilter").value = "all";
-                document.getElementById("portalFilter").value = "all";
-                document.getElementById("companyFilter").value = "all";
-                document.getElementById("countryFilter").value = "all";
-                applyFilters();
+            function resetFilters(tableId, engineId, portalId, companyId, countryId) {
+                document.getElementById(engineId).value = "all";
+                document.getElementById(portalId).value = "all";
+                document.getElementById(companyId).value = "all";
+                document.getElementById(countryId).value = "all";
+                applyFilters(tableId, engineId, portalId, companyId, countryId);
             }
 
-            function sortTable(n) {
+            function sortTable(tableId, n) {
                 let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-                table = document.getElementById("jobTable");
+                table = document.getElementById(tableId);
                 switching = true;
                 dir = "asc"; 
                 while (switching) {
@@ -388,6 +1055,35 @@ Total jobs remaining after strict Hardware/Discipline verification: 11</pre>
                         }
                     }
                 }
+            }
+
+            function exportTableToCSV(tableId, filename) {
+                let table = document.getElementById(tableId);
+                let rows = table.querySelectorAll("tr");
+                let csv = [];
+                for (let i = 0; i < rows.length; i++) {
+                    if (rows[i].style.display === "none") continue; // Don't export hidden/filtered rows
+
+                    let row = [], cols = rows[i].querySelectorAll("td, th");
+                    for (let j = 0; j < cols.length; j++) {
+                        let cellText = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                        // If it's a link cell, grab the actual URL instead of the word "View"
+                        if (cols[j].querySelector('a')) {
+                            cellText = cols[j].querySelector('a').href;
+                        }
+                        row.push('"' + cellText.replace(/"/g, '""') + '"');
+                    }
+                    csv.push(row.join(","));
+                }
+
+                let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+                let downloadLink = document.createElement("a");
+                downloadLink.download = filename;
+                downloadLink.href = window.URL.createObjectURL(csvFile);
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
             }
         </script>
     </body>
