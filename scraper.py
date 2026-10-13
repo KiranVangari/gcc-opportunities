@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 import pandas as pd
 from datetime import datetime, timedelta, timezone
@@ -131,7 +132,7 @@ def generate_table_rows(df, show_search_term=True):
     return rows_html
 
 
-def generate_html(relevant_df, raw_df):
+def generate_html(relevant_df, raw_df, duration_str="N/A"):
     os.makedirs('public', exist_ok=True)
     run_date = get_uae_time().strftime("%Y-%m-%d %I:%M %p UAE")
     logs_html = "\n".join(execution_logs)
@@ -296,7 +297,7 @@ def generate_html(relevant_df, raw_df):
                 <summary>System Metadata & Terminal Logs (Click to Expand)</summary>
                 
                 <div class="api-status-box {status_class}" style="margin-top: 15px; margin-bottom: 0;">
-                    Google Jobs API (SerpApi) Status: {api_status} | API Calls Consumed This Run: {api_calls_used}
+                    Google Jobs API (SerpApi) Status: {api_status} | API Calls Consumed: {api_calls_used} | Total Run Time: {duration_str}
                 </div>
 
                 <pre>{logs_html}</pre>
@@ -543,6 +544,7 @@ def get_serpapi_jobs():
 
 
 def main():
+    start_time = time.time()
     log_print(f"Starting job scrape at {get_uae_time().strftime('%Y-%m-%d %I:%M %p UAE')}...")
     all_jobs = []
 
@@ -573,11 +575,16 @@ def main():
     if not serp_df.empty:
         all_jobs.append(serp_df)
 
+    def get_duration():
+        elapsed_sec = int(time.time() - start_time)
+        mins, secs = divmod(elapsed_sec, 60)
+        return f"{mins}m {secs}s" if mins > 0 else f"{secs}s"
+
     if not all_jobs:
         log_print("No jobs found across any parameters.")
         empty_df = pd.DataFrame(
             columns=['site', 'date_posted', 'search_term', 'title', 'company', 'city', 'country', 'job_url', 'engine'])
-        generate_html(empty_df, empty_df)
+        generate_html(empty_df, empty_df, duration_str=get_duration())
         return
 
     # Combine results and deduplicate
@@ -613,14 +620,17 @@ def main():
 
     log_print(f"Total jobs remaining after strict Hardware/Discipline verification: {len(relevant_df)}")
 
-    # Pass both dataframes to the HTML generator
-    generate_html(relevant_df, raw_df)
+    duration_str = get_duration()
+
+    # Pass both dataframes and the elapsed duration to the HTML generator
+    generate_html(relevant_df, raw_df, duration_str=duration_str)
 
     log_print("\n" + "=" * 40)
     log_print("SCRAPE EXECUTION COMPLETE")
     log_print("=" * 40)
     log_print(f"Total Highly Relevant Jobs Published: {len(relevant_df)}")
     log_print(f"SerpApi Calls Consumed: {api_calls_used}")
+    log_print(f"Total Execution Time: {duration_str}")
     log_print("=" * 40 + "\n")
 
 
