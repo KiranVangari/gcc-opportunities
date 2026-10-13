@@ -177,14 +177,16 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
             .api-status-box {{ padding: 15px; border-radius: 8px; font-weight: bold; font-size: 0.95em; }}
             .status-good {{ background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }}
             .status-bad {{ background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }}
-            .metadata-box {{ margin-top: 20px; padding: 20px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-size: 0.85em; }}
+
+            /* Enforcing block display for collapsibles to prevent side-by-side rendering */
+            .metadata-box {{ display: block; width: 100%; margin-top: 20px; padding: 20px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-size: 0.85em; box-sizing: border-box; }}
             .metadata-box summary {{ cursor: pointer; color: #3498db; font-size: 1.2em; font-weight: bold; outline: none; list-style-position: inside; }}
             .metadata-box summary:hover {{ color: #5dade2; }}
             .metadata-box pre {{ margin-top: 15px; padding-top: 15px; border-top: 1px solid #34495e; overflow-x: auto; }}
-            .raw-section {{ margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; }}
-            .raw-section {{ margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; }}
+            .raw-section {{ display: block; width: 100%; margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; box-sizing: border-box; }}
             .raw-section summary {{ cursor: pointer; color: #e67e22; font-size: 1.3em; font-weight: bold; outline: none; }}
-            .disclaimer-box {{ background-color: #fff3cd; color: #856404; border-left: 5px solid #ffeeba; padding: 12px 15px; border-radius: 4px; font-size: 0.9em; margin-bottom: 20px; line-height: 1.4; }}
+
+            .disclaimer-box {{ background-color: #fff3cd; color: #856404; border-left: 5px solid #ffeeba; padding: 12px 15px; border-radius: 4px; font-size: 0.9em; margin-bottom: 20px; line-height: 1.4; display: block; }}
         </style>
     </head>
     <body>
@@ -198,20 +200,11 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
                 </div>
                 <button class="export-btn" onclick="exportTableToCSV('jobTable', 'Highly_Relevant_Jobs.csv')">📥 Export to Excel</button>
             </div>
-            
-            <div class="summary-header">
-                <div>
-                    <p class="summary-text">Highly Relevant Jobs: <span style="color: #3498db; font-size: 1.2em;">{len(relevant_df)}</span></p>
-                    <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #6c757d;">Last Updated: {run_date}</p>
-                </div>
-                <button class="export-btn" onclick="exportTableToCSV('jobTable', 'Highly_Relevant_Jobs.csv')">📥 Export to Excel</button>
-            </div>
 
             <div class="disclaimer-box">
                 <strong>Disclaimer:</strong> This dashboard displays jobs posted within the last 3 days. Because relevancy is determined by an automated keyword matching script, absolute accuracy cannot be guaranteed. You may need to expand the <strong>Unfiltered Raw Jobs Listing</strong> section at the bottom of the page to review all jobs collected prior to the strict boolean filtering.
             </div>
 
-            <div class="filter-bar">
             <div class="filter-bar">
                 <div class="filter-group">
                     <label>Engine Filter</label>
@@ -236,8 +229,8 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
                 <thead>
                     <tr>
                         <th onclick="sortTable('jobTable', 0)">S.No ↕</th>
-                        <th onclick="sortTable('jobTable', 1)">Engine ↕</th>
-                        <th onclick="sortTable('jobTable', 2)">Portal ↕</th>
+                        <th onclick="sortTable('jobTable', 1)">Search Engine ↕</th>
+                        <th onclick="sortTable('jobTable', 2)">Jobs Portal ↕</th>
                         <th onclick="sortTable('jobTable', 3)">Date Posted ↕</th>
                         <th onclick="sortTable('jobTable', 4)">Job Title ↕</th>
                         <th onclick="sortTable('jobTable', 5)">Company ↕</th>
@@ -287,8 +280,8 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
                         <thead>
                             <tr>
                                 <th onclick="sortTable('rawJobTable', 0)">S.No ↕</th>
-                                <th onclick="sortTable('rawJobTable', 1)">Engine ↕</th>
-                                <th onclick="sortTable('rawJobTable', 2)">Portal ↕</th>
+                                <th onclick="sortTable('rawJobTable', 1)">Search Engine ↕</th>
+                                <th onclick="sortTable('rawJobTable', 2)">Jobs Portal ↕</th>
                                 <th onclick="sortTable('rawJobTable', 3)">Date Posted ↕</th>
                                 <th onclick="sortTable('rawJobTable', 4)">Search Term ↕</th>
                                 <th onclick="sortTable('rawJobTable', 5)">Job Title ↕</th>
@@ -481,7 +474,7 @@ def get_serpapi_jobs():
 
     combined_terms = " OR ".join([f'"{term}"' for term in SEARCH_TERMS])
 
-    for location in LOCATIONS[:3]:
+    for location in LOCATIONS:
         log_print(f"Querying Google API combined terms for '{location}' (1 API Call)...")
 
         natural_query = f'({combined_terms}) jobs in {location} -linkedin -indeed'
@@ -610,6 +603,14 @@ def main():
         str).str.lower()
     raw_df = raw_df[raw_df['loc_lower'].apply(lambda x: any(gcc in x for gcc in GCC_KEYWORDS))]
     raw_df.drop(columns=['loc_lower'], inplace=True)
+
+    # Safety Check: Return clean empty HTML if geographic filter removes all results
+    if raw_df.empty:
+        log_print("All jobs were filtered out by the geographic GCC keyword filter.")
+        empty_df = pd.DataFrame(
+            columns=['site', 'date_posted', 'search_term', 'title', 'company', 'city', 'country', 'job_url', 'engine'])
+        generate_html(empty_df, empty_df, duration_str=get_duration())
+        return
 
     raw_df[['city', 'country']] = raw_df.apply(clean_location, axis=1, result_type="expand")
 
