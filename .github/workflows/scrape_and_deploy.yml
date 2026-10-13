@@ -26,6 +26,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Run Job Scraper
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }} 
+        run: |
+          mkdir -p public
+          python job_scraper.py
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
