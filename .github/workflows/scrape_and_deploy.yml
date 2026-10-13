@@ -26,17 +26,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Job Scraper
-        env:
-          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }} 
-        run: python scraper.py
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
           commit_message: "Automated update of job dashboard"
+
+      - name: Wait for GitHub Pages Build
+        run: sleep 120 # Pauses the server for 2 minutes to let the site go live
 
       - name: Send Notification Email
         uses: dawidd6/action-send-mail@v3
@@ -46,7 +44,7 @@ jobs:
           secure: true
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "GCC Job Scraper: New Dashboard Deployed"
+          subject: "Turbomachinery & Reliability Job opportunities"
           to: ${{ secrets.EMAIL_USERNAME }}
           from: GitHub Actions Scraper
           body: |
