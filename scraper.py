@@ -22,12 +22,10 @@ SEARCH_TERMS = [
     "Vibration Analyst"
 ]
 
-# LOCATIONS = [
-#     "United Arab Emirates", "Saudi Arabia", "Qatar",
-#     "Kuwait", "Oman", "Bahrain"
-# ]
 LOCATIONS = [
-     "United Arab Emirates"]
+    "United Arab Emirates", "Saudi Arabia", "Qatar",
+    "Kuwait", "Oman", "Bahrain"
+]
 
 GCC_KEYWORDS = [
     'uae', 'united arab emirates', 'dubai', 'abu dhabi', 'sharjah',
