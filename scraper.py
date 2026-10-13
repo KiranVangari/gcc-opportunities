@@ -534,7 +534,7 @@ def main():
 
     # 1. LOCAL JOB_SPY SCRAPE
     for term in SEARCH_TERMS:
-        for location in LOCATIONS:
+        for location in LOCATIONS[:3]:
             try:
                 log_print(f"Scraping '{term}' in '{location}' (JobSpy)...")
                 indeed_country = "uae" if location == "United Arab Emirates" else location.lower()
