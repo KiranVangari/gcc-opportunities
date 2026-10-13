@@ -78,7 +78,7 @@ def is_highly_relevant(row):
     discipline = ["vibration", "diagnostics", "condition monitoring", "system 1", "api 670", "api-670", "asset health",
                   "reliability"]
 
-    # Standalone overrides (If a job explicitly states these highly unique terms, keep it)
+    # Standalone overrides 
     standalones = ["bently nevada", "cmrp", "vibration analyst"]
 
     has_hardware = any(hw in text for hw in hardware)
@@ -87,10 +87,42 @@ def is_highly_relevant(row):
 
     return (has_hardware and has_discipline) or is_standalone
 
-def generate_html(df):
+def generate_table_rows(df):
+    """Helper function to generate HTML rows for both tables"""
+    rows_html = ""
+    for idx, (_, row) in enumerate(df.iterrows(), 1):
+        title = str(row.get('title', 'N/A'))
+        company = str(row.get('company', 'N/A'))
+        city = str(row.get('city', 'N/A'))
+        country = str(row.get('country', 'N/A'))
+        url = str(row.get('job_url', '#'))
+        site = str(row.get('site', 'unknown')).lower().replace(" ", "")
+        engine = str(row.get('engine', 'Unknown'))
+        term = str(row.get('search_term', 'Unknown'))
+        date_str = str(row.get('date_posted', 'N/A'))
+
+        badge_class = site if site in ['linkedin', 'indeed', 'glassdoor', 'bayt', 'naukrigulf'] else 'default-site'
+        engine_class = "engine-badge" if engine == "JobSpy" else "api-badge"
+
+        rows_html += f"""
+                    <tr>
+                        <td>{idx}</td>
+                        <td class="engine-cell"><span class="{engine_class}">{engine}</span></td>
+                        <td class="portal-cell"><span class="badge {badge_class}">{site}</span></td>
+                        <td>{date_str}</td>
+                        <td><span class="term-badge">{term}</span></td>
+                        <td style="font-weight: 500;">{title}</td>
+                        <td class="company-cell">{company}</td>
+                        <td>{city}</td>
+                        <td class="country-cell">{country}</td>
+                        <td><a href="{url}" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        """
+    return rows_html
+
+def generate_html(relevant_df, raw_df):
     os.makedirs('public', exist_ok=True)
     run_date = get_uae_time().strftime("%Y-%m-%d %I:%M %p UAE")
-    total_jobs = len(df)
     logs_html = "\n".join(execution_logs)
 
     status_class = "status-good" if "Working" in api_status else "status-bad"
@@ -104,9 +136,12 @@ def generate_html(df):
         <title>GCC Turbomachinery Job Matches</title>
         <style>
             body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 20px; color: #333; }}
-            .container {{ max-width: 1500px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+            .container {{ max-width: 1500px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }}
             h1 {{ color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 0; }}
+            .summary-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }}
             .summary-text {{ font-size: 1.1em; font-weight: bold; color: #2c3e50; margin: 0; }}
+            .export-btn {{ background-color: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }}
+            .export-btn:hover {{ background-color: #2ecc71; }}
             .filter-bar {{ display: flex; gap: 15px; margin: 20px 0; padding: 15px; background-color: #f1f3f5; border-radius: 8px; align-items: center; flex-wrap: wrap; }}
             .filter-group {{ display: flex; flex-direction: column; }}
             .filter-group label {{ font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: 5px; }}
@@ -135,83 +170,59 @@ def generate_html(df):
             .metadata-box summary {{ cursor: pointer; color: #3498db; font-size: 1.2em; font-weight: bold; outline: none; list-style-position: inside; }}
             .metadata-box summary:hover {{ color: #5dade2; }}
             .metadata-box pre {{ margin-top: 15px; padding-top: 15px; border-top: 1px solid #34495e; overflow-x: auto; }}
+            .raw-section {{ margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; }}
+            .raw-section summary {{ cursor: pointer; color: #e67e22; font-size: 1.3em; font-weight: bold; outline: none; }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>GCC Turbomachinery & Reliability Jobs (72 Hours)</h1>
+            <h1>GCC Turbomachinery & Reliability Jobs</h1>
 
-            <p class="summary-text">Total Jobs Found: <span style="color: #3498db; font-size: 1.2em;">{total_jobs}</span></p>
-            <p style="margin: 5px 0 15px 0; font-size: 0.85em; color: #6c757d;">Last Updated: {run_date}</p>
+            <div class="summary-header">
+                <div>
+                    <p class="summary-text">Highly Relevant Jobs: <span style="color: #3498db; font-size: 1.2em;">{len(relevant_df)}</span></p>
+                    <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #6c757d;">Last Updated: {run_date}</p>
+                </div>
+                <button class="export-btn" onclick="exportTableToCSV('jobTable', 'Highly_Relevant_Jobs.csv')">📥 Export to Excel</button>
+            </div>
 
             <div class="filter-bar">
                 <div class="filter-group">
                     <label>Engine Filter</label>
-                    <select id="engineFilter" onchange="applyFilters()"><option value="all">All Engines</option></select>
+                    <select id="engineFilter" onchange="applyFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')"><option value="all">All Engines</option></select>
                 </div>
                 <div class="filter-group">
                     <label>Portal Filter</label>
-                    <select id="portalFilter" onchange="applyFilters()"><option value="all">All Portals</option></select>
+                    <select id="portalFilter" onchange="applyFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')"><option value="all">All Portals</option></select>
                 </div>
                 <div class="filter-group">
                     <label>Company Filter</label>
-                    <select id="companyFilter" onchange="applyFilters()"><option value="all">All Companies</option></select>
+                    <select id="companyFilter" onchange="applyFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')"><option value="all">All Companies</option></select>
                 </div>
                 <div class="filter-group">
                     <label>Country Filter</label>
-                    <select id="countryFilter" onchange="applyFilters()"><option value="all">All Countries</option></select>
+                    <select id="countryFilter" onchange="applyFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')"><option value="all">All Countries</option></select>
                 </div>
-                <button onclick="resetFilters()" style="margin-top: 18px; padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset Filters</button>
+                <button onclick="resetFilters('jobTable', 'engineFilter', 'portalFilter', 'companyFilter', 'countryFilter')" style="margin-top: 18px; padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset Filters</button>
             </div>
 
             <table id="jobTable">
                 <thead>
                     <tr>
-                        <th onclick="sortTable(0)">S.No ↕</th>
-                        <th onclick="sortTable(1)">Engine ↕</th>
-                        <th onclick="sortTable(2)">Portal ↕</th>
-                        <th onclick="sortTable(3)">Date Posted ↕</th>
-                        <th onclick="sortTable(4)">Search Term ↕</th>
-                        <th onclick="sortTable(5)">Job Title ↕</th>
-                        <th onclick="sortTable(6)">Company ↕</th>
-                        <th onclick="sortTable(7)">City ↕</th>
-                        <th onclick="sortTable(8)">Country ↕</th>
+                        <th onclick="sortTable('jobTable', 0)">S.No ↕</th>
+                        <th onclick="sortTable('jobTable', 1)">Engine ↕</th>
+                        <th onclick="sortTable('jobTable', 2)">Portal ↕</th>
+                        <th onclick="sortTable('jobTable', 3)">Date Posted ↕</th>
+                        <th onclick="sortTable('jobTable', 4)">Search Term ↕</th>
+                        <th onclick="sortTable('jobTable', 5)">Job Title ↕</th>
+                        <th onclick="sortTable('jobTable', 6)">Company ↕</th>
+                        <th onclick="sortTable('jobTable', 7)">City ↕</th>
+                        <th onclick="sortTable('jobTable', 8)">Country ↕</th>
                         <th>Link</th>
                     </tr>
                 </thead>
                 <tbody>
-    """
-
-    for idx, (_, row) in enumerate(df.iterrows(), 1):
-        title = str(row.get('title', 'N/A'))
-        company = str(row.get('company', 'N/A'))
-        city = str(row.get('city', 'N/A'))
-        country = str(row.get('country', 'N/A'))
-        url = str(row.get('job_url', '#'))
-        site = str(row.get('site', 'unknown')).lower().replace(" ", "")
-        engine = str(row.get('engine', 'Unknown'))
-        term = str(row.get('search_term', 'Unknown'))
-        date_str = str(row.get('date_posted', 'N/A'))
-
-        badge_class = site if site in ['linkedin', 'indeed', 'glassdoor', 'bayt', 'naukrigulf'] else 'default-site'
-        engine_class = "engine-badge" if engine == "JobSpy" else "api-badge"
-
-        html_content += f"""
-                    <tr>
-                        <td>{idx}</td>
-                        <td class="engine-cell"><span class="{engine_class}">{engine}</span></td>
-                        <td class="portal-cell"><span class="badge {badge_class}">{site}</span></td>
-                        <td>{date_str}</td>
-                        <td><span class="term-badge">{term}</span></td>
-                        <td style="font-weight: 500;">{title}</td>
-                        <td class="company-cell">{company}</td>
-                        <td>{city}</td>
-                        <td class="country-cell">{country}</td>
-                        <td><a href="{url}" target="_blank" class="apply-btn">View</a></td>
-                    </tr>
-        """
-
-    html_content += f"""
+                    {generate_table_rows(relevant_df)}
                 </tbody>
             </table>
 
@@ -223,11 +234,71 @@ def generate_html(df):
                 <summary>System Metadata & Terminal Logs (Click to Expand)</summary>
                 <pre>{logs_html}</pre>
             </details>
+
+            <!-- RAW JOBS SECTION -->
+            <details class="raw-section">
+                <summary>Unfiltered Raw Jobs Listing (Click to Expand)</summary>
+                <div style="margin-top: 20px;">
+                    <div class="summary-header">
+                        <div>
+                            <p class="summary-text">Raw Jobs Found: <span style="color: #e67e22; font-size: 1.2em;">{len(raw_df)}</span></p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #6c757d;">Jobs pulled before strict boolean guillotine applied.</p>
+                        </div>
+                        <button class="export-btn" onclick="exportTableToCSV('rawJobTable', 'Raw_Unfiltered_Jobs.csv')">📥 Export Raw to Excel</button>
+                    </div>
+
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>Engine Filter</label>
+                            <select id="rawEngineFilter" onchange="applyFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')"><option value="all">All Engines</option></select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Portal Filter</label>
+                            <select id="rawPortalFilter" onchange="applyFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')"><option value="all">All Portals</option></select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Company Filter</label>
+                            <select id="rawCompanyFilter" onchange="applyFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')"><option value="all">All Companies</option></select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Country Filter</label>
+                            <select id="rawCountryFilter" onchange="applyFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')"><option value="all">All Countries</option></select>
+                        </div>
+                        <button onclick="resetFilters('rawJobTable', 'rawEngineFilter', 'rawPortalFilter', 'rawCompanyFilter', 'rawCountryFilter')" style="margin-top: 18px; padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset Filters</button>
+                    </div>
+
+                    <table id="rawJobTable">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('rawJobTable', 0)">S.No ↕</th>
+                                <th onclick="sortTable('rawJobTable', 1)">Engine ↕</th>
+                                <th onclick="sortTable('rawJobTable', 2)">Portal ↕</th>
+                                <th onclick="sortTable('rawJobTable', 3)">Date Posted ↕</th>
+                                <th onclick="sortTable('rawJobTable', 4)">Search Term ↕</th>
+                                <th onclick="sortTable('rawJobTable', 5)">Job Title ↕</th>
+                                <th onclick="sortTable('rawJobTable', 6)">Company ↕</th>
+                                <th onclick="sortTable('rawJobTable', 7)">City ↕</th>
+                                <th onclick="sortTable('rawJobTable', 8)">Country ↕</th>
+                                <th>Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {generate_table_rows(raw_df)}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
         </div>
 
         <script>
             window.onload = function() {{
-                let table = document.getElementById("jobTable");
+                initFilters("jobTable", "engineFilter", "portalFilter", "companyFilter", "countryFilter");
+                initFilters("rawJobTable", "rawEngineFilter", "rawPortalFilter", "rawCompanyFilter", "rawCountryFilter");
+            }};
+
+            function initFilters(tableId, engineId, portalId, companyId, countryId) {{
+                let table = document.getElementById(tableId);
+                if(!table) return;
                 let tr = table.getElementsByTagName("tr");
                 let engines = new Set(), portals = new Set(), companies = new Set(), countries = new Set();
 
@@ -243,14 +314,15 @@ def generate_html(df):
                     if (tdCountry) countries.add(tdCountry.textContent.trim());
                 }}
 
-                populateSelect("engineFilter", Array.from(engines).sort());
-                populateSelect("portalFilter", Array.from(portals).sort());
-                populateSelect("companyFilter", Array.from(companies).sort());
-                populateSelect("countryFilter", Array.from(countries).sort());
-            }};
+                populateSelect(engineId, Array.from(engines).sort());
+                populateSelect(portalId, Array.from(portals).sort());
+                populateSelect(companyId, Array.from(companies).sort());
+                populateSelect(countryId, Array.from(countries).sort());
+            }}
 
             function populateSelect(id, items) {{
                 let select = document.getElementById(id);
+                if(!select) return;
                 items.forEach(item => {{
                     if(item && item !== "N/A") {{
                         let opt = document.createElement("option");
@@ -261,13 +333,13 @@ def generate_html(df):
                 }});
             }}
 
-            function applyFilters() {{
-                let engineVal = document.getElementById("engineFilter").value;
-                let portalVal = document.getElementById("portalFilter").value;
-                let companyVal = document.getElementById("companyFilter").value;
-                let countryVal = document.getElementById("countryFilter").value;
+            function applyFilters(tableId, engineId, portalId, companyId, countryId) {{
+                let engineVal = document.getElementById(engineId).value;
+                let portalVal = document.getElementById(portalId).value;
+                let companyVal = document.getElementById(companyId).value;
+                let countryVal = document.getElementById(countryId).value;
 
-                let table = document.getElementById("jobTable");
+                let table = document.getElementById(tableId);
                 let tr = table.getElementsByTagName("tr");
 
                 for (let i = 1; i < tr.length; i++) {{
@@ -287,17 +359,17 @@ def generate_html(df):
                 }}
             }}
 
-            function resetFilters() {{
-                document.getElementById("engineFilter").value = "all";
-                document.getElementById("portalFilter").value = "all";
-                document.getElementById("companyFilter").value = "all";
-                document.getElementById("countryFilter").value = "all";
-                applyFilters();
+            function resetFilters(tableId, engineId, portalId, companyId, countryId) {{
+                document.getElementById(engineId).value = "all";
+                document.getElementById(portalId).value = "all";
+                document.getElementById(companyId).value = "all";
+                document.getElementById(countryId).value = "all";
+                applyFilters(tableId, engineId, portalId, companyId, countryId);
             }}
 
-            function sortTable(n) {{
+            function sortTable(tableId, n) {{
                 let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-                table = document.getElementById("jobTable");
+                table = document.getElementById(tableId);
                 switching = true;
                 dir = "asc"; 
                 while (switching) {{
@@ -334,13 +406,41 @@ def generate_html(df):
                     }}
                 }}
             }}
+
+            function exportTableToCSV(tableId, filename) {{
+                let table = document.getElementById(tableId);
+                let rows = table.querySelectorAll("tr");
+                let csv = [];
+                for (let i = 0; i < rows.length; i++) {{
+                    if (rows[i].style.display === "none") continue; // Don't export hidden/filtered rows
+                    
+                    let row = [], cols = rows[i].querySelectorAll("td, th");
+                    for (let j = 0; j < cols.length; j++) {{
+                        let cellText = cols[j].innerText.replace(/(\\r\\n|\\n|\\r)/gm, " ").trim();
+                        // If it's a link cell, grab the actual URL instead of the word "View"
+                        if (cols[j].querySelector('a')) {{
+                            cellText = cols[j].querySelector('a').href;
+                        }}
+                        row.push('"' + cellText.replace(/"/g, '""') + '"');
+                    }}
+                    csv.push(row.join(","));
+                }}
+                
+                let csvFile = new Blob([csv.join("\\n")], {{type: "text/csv"}});
+                let downloadLink = document.createElement("a");
+                downloadLink.download = filename;
+                downloadLink.href = window.URL.createObjectURL(csvFile);
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }}
         </script>
     </body>
     </html>
     """
     with open("public/index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-
 
 def get_serpapi_jobs():
     global api_calls_used, api_status
@@ -354,8 +454,7 @@ def get_serpapi_jobs():
 
     combined_terms = " OR ".join([f'"{term}"' for term in SEARCH_TERMS])
 
-    # Unlocked to loop through all 6 GCC locations for production
-    for location in LOCATIONS[:3]:
+    for location in LOCATIONS:
         log_print(f"Querying Google API combined terms for '{location}' (1 API Call)...")
 
         natural_query = f'({combined_terms}) jobs in {location} -linkedin -indeed'
@@ -429,7 +528,6 @@ def get_serpapi_jobs():
 
     return pd.DataFrame(api_jobs)
 
-
 def main():
     log_print(f"Starting job scrape at {get_uae_time().strftime('%Y-%m-%d %I:%M %p UAE')}...")
     all_jobs = []
@@ -463,57 +561,51 @@ def main():
 
     if not all_jobs:
         log_print("No jobs found across any parameters.")
-        generate_html(pd.DataFrame(
-            columns=['site', 'date_posted', 'search_term', 'title', 'company', 'city', 'country', 'job_url', 'engine']))
+        empty_df = pd.DataFrame(columns=['site', 'date_posted', 'search_term', 'title', 'company', 'city', 'country', 'job_url', 'engine'])
+        generate_html(empty_df, empty_df)
         return
 
     # Combine results and deduplicate
-    df = pd.concat(all_jobs, ignore_index=True)
-    df.drop_duplicates(subset=['title', 'company'], inplace=True)
+    raw_df = pd.concat(all_jobs, ignore_index=True)
+    raw_df.drop_duplicates(subset=['title', 'company'], inplace=True)
 
-    log_print(f"Total raw jobs collected before verification: {len(df)}")
+    log_print(f"Total raw jobs collected before verification: {len(raw_df)}")
 
-    # 3. APPLY PYTHON BOOLEAN VERIFICATION (The Guillotine)
-    df['is_relevant'] = df.apply(is_highly_relevant, axis=1)
-    df = df[df['is_relevant'] == True].copy()
-    df.drop(columns=['is_relevant'], inplace=True)
+    # Pre-process RAW data (Filters + Location Splitting + Sorting) before Guillotine
+    raw_df['loc_lower'] = raw_df['location'].astype(str).str.lower() + " " + raw_df['query_country'].astype(str).str.lower()
+    raw_df = raw_df[raw_df['loc_lower'].apply(lambda x: any(gcc in x for gcc in GCC_KEYWORDS))]
+    raw_df.drop(columns=['loc_lower'], inplace=True)
 
-    log_print(f"Total jobs remaining after strict Hardware/Discipline verification: {len(df)}")
+    raw_df[['city', 'country']] = raw_df.apply(clean_location, axis=1, result_type="expand")
 
-    if df.empty:
-        log_print("All jobs were filtered out by the strict Boolean criteria.")
-        generate_html(pd.DataFrame(
-            columns=['site', 'date_posted', 'search_term', 'title', 'company', 'city', 'country', 'job_url', 'engine']))
-        return
+    if 'date_posted' in raw_df.columns:
+        raw_df['date_posted'] = pd.to_datetime(raw_df['date_posted'], errors='coerce')
+        raw_df.sort_values(by='date_posted', ascending=False, inplace=True)
+        raw_df['date_posted'] = raw_df['date_posted'].dt.strftime('%Y-%m-%d')
+        raw_df.reset_index(drop=True, inplace=True)
 
-    # 4. APPLY STRICT GCC GEOGRAPHIC FILTER
-    df['loc_lower'] = df['location'].astype(str).str.lower() + " " + df['query_country'].astype(str).str.lower()
-    df = df[df['loc_lower'].apply(lambda x: any(gcc in x for gcc in GCC_KEYWORDS))]
-    df.drop(columns=['loc_lower'], inplace=True)
+    raw_df = raw_df.astype(object)
+    raw_df.fillna("N/A", inplace=True)
 
-    # 5. INTELLIGENT SPLIT LOCATION INTO CITY AND COUNTRY
-    df[['city', 'country']] = df.apply(clean_location, axis=1, result_type="expand")
+    # 3. APPLY PYTHON BOOLEAN VERIFICATION (The Guillotine) to create the Highly Relevant DF
+    raw_df['is_relevant'] = raw_df.apply(is_highly_relevant, axis=1)
+    relevant_df = raw_df[raw_df['is_relevant'] == True].copy()
+    
+    # Drop the temporary column from both dataframes
+    relevant_df.drop(columns=['is_relevant'], inplace=True)
+    raw_df.drop(columns=['is_relevant'], inplace=True)
 
-    # 6. SORT BY DATE POSTED
-    if 'date_posted' in df.columns:
-        df['date_posted'] = pd.to_datetime(df['date_posted'], errors='coerce')
-        df.sort_values(by='date_posted', ascending=False, inplace=True)
-        df['date_posted'] = df['date_posted'].dt.strftime('%Y-%m-%d')
-        df.reset_index(drop=True, inplace=True)
+    log_print(f"Total jobs remaining after strict Hardware/Discipline verification: {len(relevant_df)}")
 
-    df = df.astype(object)
-    df.fillna("N/A", inplace=True)
+    # Pass both dataframes to the HTML generator
+    generate_html(relevant_df, raw_df)
 
-    generate_html(df)
-
-    # Corrected Python execution artifact formatting
     log_print("\n" + "=" * 40)
     log_print("SCRAPE EXECUTION COMPLETE")
     log_print("=" * 40)
-    log_print(f"Total Highly Relevant Jobs Published: {len(df)}")
+    log_print(f"Total Highly Relevant Jobs Published: {len(relevant_df)}")
     log_print(f"SerpApi Calls Consumed: {api_calls_used}")
     log_print("=" * 40 + "\n")
-
 
 if __name__ == "__main__":
     main()
