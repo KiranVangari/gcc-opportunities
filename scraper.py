@@ -7,9 +7,11 @@ from jobspy import scrape_jobs
 # --- METADATA LOGGING SYSTEM ---
 execution_logs = []
 
+
 def log_print(msg):
     print(msg)
     execution_logs.append(str(msg))
+
 
 # 1. BROAD COLLECTION CONFIGURATION (To cast a wide net without triggering algorithms)
 SEARCH_TERMS = [
@@ -20,10 +22,12 @@ SEARCH_TERMS = [
     "Vibration Analyst"
 ]
 
+# LOCATIONS = [
+#     "United Arab Emirates", "Saudi Arabia", "Qatar",
+#     "Kuwait", "Oman", "Bahrain"
+# ]
 LOCATIONS = [
-    "United Arab Emirates", "Saudi Arabia", "Qatar",
-    "Kuwait", "Oman", "Bahrain"
-]
+     "United Arab Emirates"]
 
 GCC_KEYWORDS = [
     'uae', 'united arab emirates', 'dubai', 'abu dhabi', 'sharjah',
@@ -33,10 +37,12 @@ GCC_KEYWORDS = [
 
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY")
 api_calls_used = 0
-api_status = "Working (No Errors)" # Global tracker for API health
+api_status = "Working (No Errors)"  # Global tracker for API health
+
 
 def get_uae_time():
     return datetime.now(timezone.utc) + timedelta(hours=4)
+
 
 def clean_location(row):
     raw = str(row.get('location', 'N/A')).strip()
@@ -54,6 +60,7 @@ def clean_location(row):
         else:
             return raw, query_country
 
+
 def parse_relative_date(text):
     if not isinstance(text, str) or "ago" not in text:
         return text
@@ -68,6 +75,7 @@ def parse_relative_date(text):
         pass
     return text
 
+
 # --- THE STRICT BOOLEAN VERIFIER ---
 def is_highly_relevant(row):
     title = str(row.get('title', '')).lower()
@@ -78,7 +86,7 @@ def is_highly_relevant(row):
     discipline = ["vibration", "diagnostics", "condition monitoring", "system 1", "api 670", "api-670", "asset health",
                   "reliability"]
 
-    # Standalone overrides 
+    # Standalone overrides
     standalones = ["bently nevada", "cmrp", "vibration analyst"]
 
     has_hardware = any(hw in text for hw in hardware)
@@ -87,7 +95,8 @@ def is_highly_relevant(row):
 
     return (has_hardware and has_discipline) or is_standalone
 
-def generate_table_rows(df):
+
+def generate_table_rows(df, show_search_term=True):
     """Helper function to generate HTML rows for both tables"""
     rows_html = ""
     for idx, (_, row) in enumerate(df.iterrows(), 1):
@@ -104,13 +113,16 @@ def generate_table_rows(df):
         badge_class = site if site in ['linkedin', 'indeed', 'glassdoor', 'bayt', 'naukrigulf'] else 'default-site'
         engine_class = "engine-badge" if engine == "JobSpy" else "api-badge"
 
+        # Conditionally render the Search Term column
+        term_td = f'<td><span class="term-badge">{term}</span></td>' if show_search_term else ""
+
         rows_html += f"""
                     <tr>
                         <td>{idx}</td>
                         <td class="engine-cell"><span class="{engine_class}">{engine}</span></td>
                         <td class="portal-cell"><span class="badge {badge_class}">{site}</span></td>
                         <td>{date_str}</td>
-                        <td><span class="term-badge">{term}</span></td>
+                        {term_td}
                         <td style="font-weight: 500;">{title}</td>
                         <td class="company-cell">{company}</td>
                         <td>{city}</td>
@@ -119,6 +131,7 @@ def generate_table_rows(df):
                     </tr>
         """
     return rows_html
+
 
 def generate_html(relevant_df, raw_df):
     os.makedirs('public', exist_ok=True)
@@ -210,30 +223,21 @@ def generate_html(relevant_df, raw_df):
                 <thead>
                     <tr>
                         <th onclick="sortTable('jobTable', 0)">S.No ↕</th>
-                        <th onclick="sortTable('jobTable', 1)">Engine ↕</th>
-                        <th onclick="sortTable('jobTable', 2)">Portal ↕</th>
+                        <th onclick="sortTable('jobTable', 1)">Search Engine ↕</th>
+                        <th onclick="sortTable('jobTable', 2)">Job's Portal ↕</th>
                         <th onclick="sortTable('jobTable', 3)">Date Posted ↕</th>
-                        <th onclick="sortTable('jobTable', 4)">Search Term ↕</th>
-                        <th onclick="sortTable('jobTable', 5)">Job Title ↕</th>
-                        <th onclick="sortTable('jobTable', 6)">Company ↕</th>
-                        <th onclick="sortTable('jobTable', 7)">City ↕</th>
-                        <th onclick="sortTable('jobTable', 8)">Country ↕</th>
+                        <th onclick="sortTable('jobTable', 4)">Job Title ↕</th>
+                        <th onclick="sortTable('jobTable', 5)">Company ↕</th>
+                        <th onclick="sortTable('jobTable', 6)">City ↕</th>
+                        <th onclick="sortTable('jobTable', 7)">Country ↕</th>
                         <th>Link</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {generate_table_rows(relevant_df)}
+                    {generate_table_rows(relevant_df, show_search_term=False)}
                 </tbody>
             </table>
 
-            <div class="api-status-box {status_class}">
-                Google Jobs API (SerpApi) Status: {api_status} | API Calls Consumed This Run: {api_calls_used}
-            </div>
-
-            <details class="metadata-box">
-                <summary>System Metadata & Terminal Logs (Click to Expand)</summary>
-                <pre>{logs_html}</pre>
-            </details>
 
             <!-- RAW JOBS SECTION -->
             <details class="raw-section">
@@ -271,8 +275,8 @@ def generate_html(relevant_df, raw_df):
                         <thead>
                             <tr>
                                 <th onclick="sortTable('rawJobTable', 0)">S.No ↕</th>
-                                <th onclick="sortTable('rawJobTable', 1)">Engine ↕</th>
-                                <th onclick="sortTable('rawJobTable', 2)">Portal ↕</th>
+                                <th onclick="sortTable('rawJobTable', 1)">Search Engine ↕</th>
+                                <th onclick="sortTable('rawJobTable', 2)">Job's Portal ↕</th>
                                 <th onclick="sortTable('rawJobTable', 3)">Date Posted ↕</th>
                                 <th onclick="sortTable('rawJobTable', 4)">Search Term ↕</th>
                                 <th onclick="sortTable('rawJobTable', 5)">Job Title ↕</th>
@@ -283,13 +287,23 @@ def generate_html(relevant_df, raw_df):
                             </tr>
                         </thead>
                         <tbody>
-                            {generate_table_rows(raw_df)}
+                            {generate_table_rows(raw_df, show_search_term=True)}
                         </tbody>
                     </table>
                 </div>
             </details>
-        </div>
 
+            <!-- Natively Collapsed Log Box -->
+            <details class="metadata-box">
+                <summary>System Metadata & Terminal Logs (Click to Expand)</summary>
+                
+                <div class="api-status-box {status_class}" style="margin-top: 15px; margin-bottom: 0;">
+                    Google Jobs API (SerpApi) Status: {api_status} | API Calls Consumed This Run: {api_calls_used}
+                </div>
+
+                <pre>{logs_html}</pre>
+            </details>
+        </div>
         <script>
             window.onload = function() {{
                 initFilters("jobTable", "engineFilter", "portalFilter", "companyFilter", "countryFilter");
@@ -413,7 +427,7 @@ def generate_html(relevant_df, raw_df):
                 let csv = [];
                 for (let i = 0; i < rows.length; i++) {{
                     if (rows[i].style.display === "none") continue; // Don't export hidden/filtered rows
-                    
+
                     let row = [], cols = rows[i].querySelectorAll("td, th");
                     for (let j = 0; j < cols.length; j++) {{
                         let cellText = cols[j].innerText.replace(/(\\r\\n|\\n|\\r)/gm, " ").trim();
@@ -425,7 +439,7 @@ def generate_html(relevant_df, raw_df):
                     }}
                     csv.push(row.join(","));
                 }}
-                
+
                 let csvFile = new Blob([csv.join("\\n")], {{type: "text/csv"}});
                 let downloadLink = document.createElement("a");
                 downloadLink.download = filename;
@@ -442,6 +456,7 @@ def generate_html(relevant_df, raw_df):
     with open("public/index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
+
 def get_serpapi_jobs():
     global api_calls_used, api_status
     if not SERPAPI_KEY or SERPAPI_KEY == "YOUR_SERPAPI_KEY_HERE":
@@ -454,7 +469,7 @@ def get_serpapi_jobs():
 
     combined_terms = " OR ".join([f'"{term}"' for term in SEARCH_TERMS])
 
-    for location in LOCATIONS:
+    for location in LOCATIONS[:3]:
         log_print(f"Querying Google API combined terms for '{location}' (1 API Call)...")
 
         natural_query = f'({combined_terms}) jobs in {location} -linkedin -indeed'
@@ -528,13 +543,14 @@ def get_serpapi_jobs():
 
     return pd.DataFrame(api_jobs)
 
+
 def main():
     log_print(f"Starting job scrape at {get_uae_time().strftime('%Y-%m-%d %I:%M %p UAE')}...")
     all_jobs = []
 
     # 1. LOCAL JOB_SPY SCRAPE
     for term in SEARCH_TERMS:
-        for location in LOCATIONS[:3]:
+        for location in LOCATIONS:
             try:
                 log_print(f"Scraping '{term}' in '{location}' (JobSpy)...")
                 indeed_country = "uae" if location == "United Arab Emirates" else location.lower()
@@ -561,7 +577,8 @@ def main():
 
     if not all_jobs:
         log_print("No jobs found across any parameters.")
-        empty_df = pd.DataFrame(columns=['site', 'date_posted', 'search_term', 'title', 'company', 'city', 'country', 'job_url', 'engine'])
+        empty_df = pd.DataFrame(
+            columns=['site', 'date_posted', 'search_term', 'title', 'company', 'city', 'country', 'job_url', 'engine'])
         generate_html(empty_df, empty_df)
         return
 
@@ -572,7 +589,8 @@ def main():
     log_print(f"Total raw jobs collected before verification: {len(raw_df)}")
 
     # Pre-process RAW data (Filters + Location Splitting + Sorting) before Guillotine
-    raw_df['loc_lower'] = raw_df['location'].astype(str).str.lower() + " " + raw_df['query_country'].astype(str).str.lower()
+    raw_df['loc_lower'] = raw_df['location'].astype(str).str.lower() + " " + raw_df['query_country'].astype(
+        str).str.lower()
     raw_df = raw_df[raw_df['loc_lower'].apply(lambda x: any(gcc in x for gcc in GCC_KEYWORDS))]
     raw_df.drop(columns=['loc_lower'], inplace=True)
 
@@ -590,7 +608,7 @@ def main():
     # 3. APPLY PYTHON BOOLEAN VERIFICATION (The Guillotine) to create the Highly Relevant DF
     raw_df['is_relevant'] = raw_df.apply(is_highly_relevant, axis=1)
     relevant_df = raw_df[raw_df['is_relevant'] == True].copy()
-    
+
     # Drop the temporary column from both dataframes
     relevant_df.drop(columns=['is_relevant'], inplace=True)
     raw_df.drop(columns=['is_relevant'], inplace=True)
@@ -606,6 +624,7 @@ def main():
     log_print(f"Total Highly Relevant Jobs Published: {len(relevant_df)}")
     log_print(f"SerpApi Calls Consumed: {api_calls_used}")
     log_print("=" * 40 + "\n")
+
 
 if __name__ == "__main__":
     main()
