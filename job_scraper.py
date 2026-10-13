@@ -182,7 +182,9 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
             .metadata-box summary:hover {{ color: #5dade2; }}
             .metadata-box pre {{ margin-top: 15px; padding-top: 15px; border-top: 1px solid #34495e; overflow-x: auto; }}
             .raw-section {{ margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; }}
+            .raw-section {{ margin-top: 20px; padding: 20px; background: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; }}
             .raw-section summary {{ cursor: pointer; color: #e67e22; font-size: 1.3em; font-weight: bold; outline: none; }}
+            .disclaimer-box {{ background-color: #fff3cd; color: #856404; border-left: 5px solid #ffeeba; padding: 12px 15px; border-radius: 4px; font-size: 0.9em; margin-bottom: 20px; line-height: 1.4; }}
         </style>
     </head>
     <body>
@@ -196,7 +198,20 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
                 </div>
                 <button class="export-btn" onclick="exportTableToCSV('jobTable', 'Highly_Relevant_Jobs.csv')">📥 Export to Excel</button>
             </div>
+            
+            <div class="summary-header">
+                <div>
+                    <p class="summary-text">Highly Relevant Jobs: <span style="color: #3498db; font-size: 1.2em;">{len(relevant_df)}</span></p>
+                    <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #6c757d;">Last Updated: {run_date}</p>
+                </div>
+                <button class="export-btn" onclick="exportTableToCSV('jobTable', 'Highly_Relevant_Jobs.csv')">📥 Export to Excel</button>
+            </div>
 
+            <div class="disclaimer-box">
+                <strong>Disclaimer:</strong> This dashboard displays jobs posted within the last 3 days. Because relevancy is determined by an automated keyword matching script, absolute accuracy cannot be guaranteed. You may need to expand the <strong>Unfiltered Raw Jobs Listing</strong> section at the bottom of the page to review all jobs collected prior to the strict boolean filtering.
+            </div>
+
+            <div class="filter-bar">
             <div class="filter-bar">
                 <div class="filter-group">
                     <label>Engine Filter</label>
@@ -466,7 +481,7 @@ def get_serpapi_jobs():
 
     combined_terms = " OR ".join([f'"{term}"' for term in SEARCH_TERMS])
 
-    for location in LOCATIONS[:3]:
+    for location in LOCATIONS[:1]:
         log_print(f"Querying Google API combined terms for '{location}' (1 API Call)...")
 
         natural_query = f'({combined_terms}) jobs in {location} -linkedin -indeed'
