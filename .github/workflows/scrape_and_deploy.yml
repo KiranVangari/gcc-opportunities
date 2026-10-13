@@ -41,7 +41,7 @@ jobs:
           commit_message: "Automated update of job dashboard"
 
       - name: Wait for GitHub Pages Build
-        run: sleep 120 # Pauses the server for 2 minutes to let the site go live
+        run: sleep 180 # Pauses the server for 2 minutes to let the site go live
 
       - name: Send Notification Email
         uses: dawidd6/action-send-mail@v3
