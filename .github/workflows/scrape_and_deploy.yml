@@ -29,7 +29,7 @@ jobs:
       - name: Run Job Scraper
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }} 
-        run: python job_scraper.py
+        run: python scraper.py
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
