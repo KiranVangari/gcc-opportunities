@@ -112,7 +112,6 @@ def generate_table_rows(df, show_search_term=True):
         badge_class = site if site in ['linkedin', 'indeed', 'glassdoor', 'bayt', 'naukrigulf'] else 'default-site'
         engine_class = "engine-badge" if engine == "JobSpy" else "api-badge"
 
-        # Conditionally render the Search Term column
         term_td = f'<td><span class="term-badge">{term}</span></td>' if show_search_term else ""
 
         rows_html += f"""
@@ -175,7 +174,7 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
             .engine-badge {{ background-color: #34495e; color: #fff; padding: 3px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold;}}
             .api-badge {{ background-color: #e67e22; color: #fff; padding: 3px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold;}}
             .term-badge {{ background-color: #f1c40f; color: #333; padding: 3px 6px; border-radius: 4px; font-size: 0.85em; font-weight: 600; border: 1px solid #d4ac0d;}}
-            .api-status-box {{ margin-top: 40px; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 0.95em; }}
+            .api-status-box {{ padding: 15px; border-radius: 8px; font-weight: bold; font-size: 0.95em; }}
             .status-good {{ background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }}
             .status-bad {{ background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }}
             .metadata-box {{ margin-top: 20px; padding: 20px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-size: 0.85em; }}
@@ -222,8 +221,8 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
                 <thead>
                     <tr>
                         <th onclick="sortTable('jobTable', 0)">S.No ↕</th>
-                        <th onclick="sortTable('jobTable', 1)">Search Engine ↕</th>
-                        <th onclick="sortTable('jobTable', 2)">Job's Portal ↕</th>
+                        <th onclick="sortTable('jobTable', 1)">Engine ↕</th>
+                        <th onclick="sortTable('jobTable', 2)">Portal ↕</th>
                         <th onclick="sortTable('jobTable', 3)">Date Posted ↕</th>
                         <th onclick="sortTable('jobTable', 4)">Job Title ↕</th>
                         <th onclick="sortTable('jobTable', 5)">Company ↕</th>
@@ -236,7 +235,6 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
                     {generate_table_rows(relevant_df, show_search_term=False)}
                 </tbody>
             </table>
-
 
             <!-- RAW JOBS SECTION -->
             <details class="raw-section">
@@ -274,8 +272,8 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
                         <thead>
                             <tr>
                                 <th onclick="sortTable('rawJobTable', 0)">S.No ↕</th>
-                                <th onclick="sortTable('rawJobTable', 1)">Search Engine ↕</th>
-                                <th onclick="sortTable('rawJobTable', 2)">Job's Portal ↕</th>
+                                <th onclick="sortTable('rawJobTable', 1)">Engine ↕</th>
+                                <th onclick="sortTable('rawJobTable', 2)">Portal ↕</th>
                                 <th onclick="sortTable('rawJobTable', 3)">Date Posted ↕</th>
                                 <th onclick="sortTable('rawJobTable', 4)">Search Term ↕</th>
                                 <th onclick="sortTable('rawJobTable', 5)">Job Title ↕</th>
@@ -295,7 +293,7 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
             <!-- Natively Collapsed Log Box -->
             <details class="metadata-box">
                 <summary>System Metadata & Terminal Logs (Click to Expand)</summary>
-                
+
                 <div class="api-status-box {status_class}" style="margin-top: 15px; margin-bottom: 0;">
                     Google Jobs API (SerpApi) Status: {api_status} | API Calls Consumed: {api_calls_used} | Total Run Time: {duration_str}
                 </div>
@@ -303,6 +301,7 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
                 <pre>{logs_html}</pre>
             </details>
         </div>
+
         <script>
             window.onload = function() {{
                 initFilters("jobTable", "engineFilter", "portalFilter", "companyFilter", "countryFilter");
@@ -425,12 +424,11 @@ def generate_html(relevant_df, raw_df, duration_str="N/A"):
                 let rows = table.querySelectorAll("tr");
                 let csv = [];
                 for (let i = 0; i < rows.length; i++) {{
-                    if (rows[i].style.display === "none") continue; // Don't export hidden/filtered rows
+                    if (rows[i].style.display === "none") continue;
 
                     let row = [], cols = rows[i].querySelectorAll("td, th");
                     for (let j = 0; j < cols.length; j++) {{
                         let cellText = cols[j].innerText.replace(/(\\r\\n|\\n|\\r)/gm, " ").trim();
-                        // If it's a link cell, grab the actual URL instead of the word "View"
                         if (cols[j].querySelector('a')) {{
                             cellText = cols[j].querySelector('a').href;
                         }}
@@ -468,7 +466,7 @@ def get_serpapi_jobs():
 
     combined_terms = " OR ".join([f'"{term}"' for term in SEARCH_TERMS])
 
-    for location in LOCATIONS[:1]:
+    for location in LOCATIONS[:3]:
         log_print(f"Querying Google API combined terms for '{location}' (1 API Call)...")
 
         natural_query = f'({combined_terms}) jobs in {location} -linkedin -indeed'
@@ -498,13 +496,11 @@ def get_serpapi_jobs():
 
             if "error" in data:
                 error_msg = data["error"]
-                # Catch multiple variations of 0 results/unparseable page messages gracefully
                 if "hasn't returned any results" in error_msg or "couldn't get valid results" in error_msg:
                     log_print(f"Google Jobs found 0 results for {location}.")
                 else:
-                    # Log other localized errors but DO NOT break the loop
                     log_print(f"SerpApi localized error in {location}: {error_msg}")
-                continue 
+                continue
 
             if "jobs_results" in data:
                 for job in data["jobs_results"]:
