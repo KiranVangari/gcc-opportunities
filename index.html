@@ -7,96 +7,349 @@
         <title>GCC Turbomachinery Job Matches</title>
         <style>
             body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 20px; color: #333; }
-            .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+            .container { max-width: 1500px; margin: 0 auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
             h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 0; }
-            .controls-container { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; padding: 15px; background-color: #f1f3f5; border-radius: 8px; }
             .summary-text { font-size: 1.1em; font-weight: bold; color: #2c3e50; margin: 0; }
-            .filter-box select { padding: 8px 12px; border-radius: 5px; border: 1px solid #ced4da; font-size: 1em; cursor: pointer; }
+            .filter-bar { display: flex; gap: 15px; margin: 20px 0; padding: 15px; background-color: #f1f3f5; border-radius: 8px; align-items: center; flex-wrap: wrap; }
+            .filter-group { display: flex; flex-direction: column; }
+            .filter-group label { font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: 5px; }
+            .filter-group select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; min-width: 140px; outline: none; }
             table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95em; }
-            th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+            th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #dee2e6; }
             th { background-color: #2c3e50; color: white; cursor: pointer; position: sticky; top: 0; }
             th:hover { background-color: #34495e; }
             tr:hover { background-color: #f8f9fa; }
-            a.apply-btn { color: white; background-color: #3498db; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; }
+            a.apply-btn { color: white; background-color: #3498db; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; text-align: center; }
             a.apply-btn:hover { background-color: #2980b9; }
-            .badge { padding: 5px 10px; border-radius: 12px; font-size: 0.8em; font-weight: bold; color: white; text-transform: uppercase; letter-spacing: 0.5px; }
+            .badge { padding: 4px 8px; border-radius: 8px; font-size: 0.8em; font-weight: bold; color: white; text-transform: uppercase; display: inline-block; text-align: center; min-width: 80px;}
             .linkedin { background-color: #0077b5; }
             .indeed { background-color: #2164f4; }
             .glassdoor { background-color: #0caa41; }
             .bayt { background-color: #005a9c; }
-            .naukri { background-color: #ff7555; }
+            .naukrigulf { background-color: #ff7555; }
             .default-site { background-color: #6c757d; }
+            .engine-badge { background-color: #34495e; color: #fff; padding: 3px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold;}
+            .api-badge { background-color: #e67e22; color: #fff; padding: 3px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold;}
+            .term-badge { background-color: #f1c40f; color: #333; padding: 3px 6px; border-radius: 4px; font-size: 0.85em; font-weight: 600; border: 1px solid #d4ac0d;}
+            .api-status-box { margin-top: 40px; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 0.95em; }
+            .status-good { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+            .status-bad { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+            .metadata-box { margin-top: 20px; padding: 20px; background: #2c3e50; color: #ecf0f1; border-radius: 8px; font-size: 0.85em; }
+            .metadata-box summary { cursor: pointer; color: #3498db; font-size: 1.2em; font-weight: bold; outline: none; list-style-position: inside; }
+            .metadata-box summary:hover { color: #5dade2; }
+            .metadata-box pre { margin-top: 15px; padding-top: 15px; border-top: 1px solid #34495e; overflow-x: auto; }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>GCC Turbomachinery & Reliability Jobs</h1>
-            
-            <div class="controls-container">
-                <div>
-                    <p class="summary-text">Total Jobs Found: <span style="color: #3498db; font-size: 1.2em;">0</span></p>
-                    <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #6c757d;">Last Updated: 2026-10-12 12:41 UTC</p>
+            <h1>GCC Turbomachinery & Reliability Jobs (72 Hours)</h1>
+
+            <p class="summary-text">Total Jobs Found: <span style="color: #3498db; font-size: 1.2em;">11</span></p>
+            <p style="margin: 5px 0 15px 0; font-size: 0.85em; color: #6c757d;">Last Updated: 2026-10-13 02:37 PM UAE</p>
+
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Engine Filter</label>
+                    <select id="engineFilter" onchange="applyFilters()"><option value="all">All Engines</option></select>
                 </div>
-                <div class="filter-box">
-                    <label for="countryFilter"><strong>Filter by Country: </strong></label>
-                    <select id="countryFilter" onchange="filterTable()">
-                        <option value="all">All Locations</option>
-                        <option value="uae">UAE (Dubai/Abu Dhabi)</option>
-                        <option value="saudi">Saudi Arabia</option>
-                        <option value="qatar">Qatar</option>
-                        <option value="kuwait">Kuwait</option>
-                        <option value="oman">Oman</option>
-                        <option value="bahrain">Bahrain</option>
-                    </select>
+                <div class="filter-group">
+                    <label>Portal Filter</label>
+                    <select id="portalFilter" onchange="applyFilters()"><option value="all">All Portals</option></select>
                 </div>
+                <div class="filter-group">
+                    <label>Company Filter</label>
+                    <select id="companyFilter" onchange="applyFilters()"><option value="all">All Companies</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Country Filter</label>
+                    <select id="countryFilter" onchange="applyFilters()"><option value="all">All Countries</option></select>
+                </div>
+                <button onclick="resetFilters()" style="margin-top: 18px; padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset Filters</button>
             </div>
 
             <table id="jobTable">
                 <thead>
                     <tr>
                         <th onclick="sortTable(0)">S.No ↕</th>
-                        <th onclick="sortTable(1)">Portal ↕</th>
-                        <th onclick="sortTable(2)">Date Posted ↕</th>
-                        <th onclick="sortTable(3)">Job Title ↕</th>
-                        <th onclick="sortTable(4)">Company ↕</th>
-                        <th onclick="sortTable(5)">Location ↕</th>
+                        <th onclick="sortTable(1)">Engine ↕</th>
+                        <th onclick="sortTable(2)">Portal ↕</th>
+                        <th onclick="sortTable(3)">Date Posted ↕</th>
+                        <th onclick="sortTable(4)">Search Term ↕</th>
+                        <th onclick="sortTable(5)">Job Title ↕</th>
+                        <th onclick="sortTable(6)">Company ↕</th>
+                        <th onclick="sortTable(7)">City ↕</th>
+                        <th onclick="sortTable(8)">Country ↕</th>
                         <th>Link</th>
                     </tr>
                 </thead>
                 <tbody>
     
+                    <tr>
+                        <td>1</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Area Maintenance Head (Refinery)</td>
+                        <td class="company-cell">Trinzic</td>
+                        <td>الخبر, S04</td>
+                        <td class="country-cell">Saudi Arabia</td>
+                        <td><a href="https://sa.indeed.com/viewjob?jk=d5767d035c1ab90e" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>2</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Reliability Engineer</td>
+                        <td class="company-cell">Trinzic</td>
+                        <td>الجبيل, S04</td>
+                        <td class="country-cell">Saudi Arabia</td>
+                        <td><a href="https://sa.indeed.com/viewjob?jk=d98413af8877e56d" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>3</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Engineer (Reliability)</td>
+                        <td class="company-cell">Trinzic</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=8569152035b1b2eb" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>4</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Senior Engineer (Reliability)</td>
+                        <td class="company-cell">Trinzic</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=e28cba1cff811e85" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>5</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Specialist Engineer (Reliability)</td>
+                        <td class="company-cell">Trinzic</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=c4a0ca5f2cf0e941" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>6</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-13</td>
+                        <td><span class="term-badge">Reliability Engineer</span></td>
+                        <td style="font-weight: 500;">Service Manager - Central Area</td>
+                        <td class="company-cell">Atlas Copco Group</td>
+                        <td>الرياض, S01</td>
+                        <td class="country-cell">Saudi Arabia</td>
+                        <td><a href="https://sa.indeed.com/viewjob?jk=28bdedd6f66ae22f" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>7</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Mechanic</td>
+                        <td class="company-cell">Knauf MEASA</td>
+                        <td>Ras al-Khaimah, RK</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=a7484eb1850e8bc1" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>8</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-12</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Reliability Engineer</td>
+                        <td class="company-cell">KBR</td>
+                        <td>الجبيل, S04</td>
+                        <td class="country-cell">Saudi Arabia</td>
+                        <td><a href="https://sa.indeed.com/viewjob?jk=0c6d3595543dade1" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>9</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-10</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Principal Rotating Engineer</td>
+                        <td class="company-cell">Worley</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=87302d2a31270ba1" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>10</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-10</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Senior Rotating Engineer</td>
+                        <td class="company-cell">Worley</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=984b13e06cece4ef" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
+                    <tr>
+                        <td>11</td>
+                        <td class="engine-cell"><span class="engine-badge">JobSpy</span></td>
+                        <td class="portal-cell"><span class="badge indeed">indeed</span></td>
+                        <td>2026-10-10</td>
+                        <td><span class="term-badge">Rotating Equipment</span></td>
+                        <td style="font-weight: 500;">Principal Mechanical Static Engineer</td>
+                        <td class="company-cell">Worley</td>
+                        <td>Abu Dhabi, AZ</td>
+                        <td class="country-cell">United Arab Emirates</td>
+                        <td><a href="https://ae.indeed.com/viewjob?jk=eec4e76919865288" target="_blank" class="apply-btn">View</a></td>
+                    </tr>
+        
                 </tbody>
             </table>
+
+            <div class="api-status-box status-good">
+                Google Jobs API (SerpApi) Status: Working (No Errors) | API Calls Consumed This Run: 3
+            </div>
+
+            <details class="metadata-box">
+                <summary>System Metadata & Terminal Logs (Click to Expand)</summary>
+                <pre>Starting job scrape at 2026-10-13 02:37 PM UAE...
+Scraping 'Rotating Equipment' in 'United Arab Emirates' (JobSpy)...
+Scraping 'Rotating Equipment' in 'Saudi Arabia' (JobSpy)...
+Scraping 'Rotating Equipment' in 'Qatar' (JobSpy)...
+Scraping 'Rotating Equipment' in 'Kuwait' (JobSpy)...
+Scraping 'Rotating Equipment' in 'Oman' (JobSpy)...
+Scraping 'Rotating Equipment' in 'Bahrain' (JobSpy)...
+Scraping 'Turbomachinery' in 'United Arab Emirates' (JobSpy)...
+Scraping 'Turbomachinery' in 'Saudi Arabia' (JobSpy)...
+Scraping 'Turbomachinery' in 'Qatar' (JobSpy)...
+Scraping 'Turbomachinery' in 'Kuwait' (JobSpy)...
+Scraping 'Turbomachinery' in 'Oman' (JobSpy)...
+Scraping 'Turbomachinery' in 'Bahrain' (JobSpy)...
+Scraping 'Reliability Engineer' in 'United Arab Emirates' (JobSpy)...
+Scraping 'Reliability Engineer' in 'Saudi Arabia' (JobSpy)...
+Scraping 'Reliability Engineer' in 'Qatar' (JobSpy)...
+Scraping 'Reliability Engineer' in 'Kuwait' (JobSpy)...
+Scraping 'Reliability Engineer' in 'Oman' (JobSpy)...
+Scraping 'Reliability Engineer' in 'Bahrain' (JobSpy)...
+Scraping 'Condition Monitoring' in 'United Arab Emirates' (JobSpy)...
+Scraping 'Condition Monitoring' in 'Saudi Arabia' (JobSpy)...
+Scraping 'Condition Monitoring' in 'Qatar' (JobSpy)...
+Scraping 'Condition Monitoring' in 'Kuwait' (JobSpy)...
+Scraping 'Condition Monitoring' in 'Oman' (JobSpy)...
+Scraping 'Condition Monitoring' in 'Bahrain' (JobSpy)...
+Scraping 'Vibration Analyst' in 'United Arab Emirates' (JobSpy)...
+Scraping 'Vibration Analyst' in 'Saudi Arabia' (JobSpy)...
+Scraping 'Vibration Analyst' in 'Qatar' (JobSpy)...
+Scraping 'Vibration Analyst' in 'Kuwait' (JobSpy)...
+Scraping 'Vibration Analyst' in 'Oman' (JobSpy)...
+Scraping 'Vibration Analyst' in 'Bahrain' (JobSpy)...
+
+Starting SerpApi Google Jobs scrape...
+Querying Google API combined terms for 'United Arab Emirates' (1 API Call)...
+Google Jobs found 0 results for United Arab Emirates.
+Querying Google API combined terms for 'Saudi Arabia' (1 API Call)...
+Google Jobs found 0 results for Saudi Arabia.
+Querying Google API combined terms for 'Qatar' (1 API Call)...
+Google Jobs found 0 results for Qatar.
+Total raw jobs collected before verification: 180
+Total jobs remaining after strict Hardware/Discipline verification: 11</pre>
+            </details>
         </div>
 
         <script>
-            // Country Filtering Logic
-            function filterTable() {
-                let dropdown = document.getElementById("countryFilter");
-                let filterValue = dropdown.value.toLowerCase();
+            window.onload = function() {
+                let table = document.getElementById("jobTable");
+                let tr = table.getElementsByTagName("tr");
+                let engines = new Set(), portals = new Set(), companies = new Set(), countries = new Set();
+
+                for (let i = 1; i < tr.length; i++) {
+                    let tdEngine = tr[i].getElementsByClassName("engine-cell")[0];
+                    let tdPortal = tr[i].getElementsByClassName("portal-cell")[0];
+                    let tdCompany = tr[i].getElementsByClassName("company-cell")[0];
+                    let tdCountry = tr[i].getElementsByClassName("country-cell")[0];
+
+                    if (tdEngine) engines.add(tdEngine.textContent.trim());
+                    if (tdPortal) portals.add(tdPortal.textContent.trim());
+                    if (tdCompany) companies.add(tdCompany.textContent.trim());
+                    if (tdCountry) countries.add(tdCountry.textContent.trim());
+                }
+
+                populateSelect("engineFilter", Array.from(engines).sort());
+                populateSelect("portalFilter", Array.from(portals).sort());
+                populateSelect("companyFilter", Array.from(companies).sort());
+                populateSelect("countryFilter", Array.from(countries).sort());
+            };
+
+            function populateSelect(id, items) {
+                let select = document.getElementById(id);
+                items.forEach(item => {
+                    if(item && item !== "N/A") {
+                        let opt = document.createElement("option");
+                        opt.value = item.toLowerCase();
+                        opt.innerHTML = item;
+                        select.appendChild(opt);
+                    }
+                });
+            }
+
+            function applyFilters() {
+                let engineVal = document.getElementById("engineFilter").value;
+                let portalVal = document.getElementById("portalFilter").value;
+                let companyVal = document.getElementById("companyFilter").value;
+                let countryVal = document.getElementById("countryFilter").value;
+
                 let table = document.getElementById("jobTable");
                 let tr = table.getElementsByTagName("tr");
 
                 for (let i = 1; i < tr.length; i++) {
-                    let td = tr[i].getElementsByClassName("loc-cell")[0];
-                    if (td) {
-                        let loc = (td.textContent || td.innerText).toLowerCase();
-                        let show = false;
-                        
-                        if (filterValue === "all") {
-                            show = true;
-                        } else if (filterValue === "uae" && (loc.includes("uae") || loc.includes("emirates") || loc.includes("dubai") || loc.includes("abu dhabi") || loc.includes("sharjah"))) {
-                            show = true;
-                        } else if (loc.includes(filterValue)) {
-                            show = true;
-                        }
-                        
-                        tr[i].style.display = show ? "" : "none";
+                    let tdEngine = tr[i].getElementsByClassName("engine-cell")[0];
+                    let tdPortal = tr[i].getElementsByClassName("portal-cell")[0];
+                    let tdCompany = tr[i].getElementsByClassName("company-cell")[0];
+                    let tdCountry = tr[i].getElementsByClassName("country-cell")[0];
+
+                    if (tdEngine && tdPortal && tdCompany && tdCountry) {
+                        let engineMatch = (engineVal === "all") || (tdEngine.textContent.trim().toLowerCase() === engineVal);
+                        let portalMatch = (portalVal === "all") || (tdPortal.textContent.trim().toLowerCase() === portalVal);
+                        let companyMatch = (companyVal === "all") || (tdCompany.textContent.trim().toLowerCase() === companyVal);
+                        let countryMatch = (countryVal === "all") || (tdCountry.textContent.trim().toLowerCase() === countryVal);
+
+                        tr[i].style.display = (engineMatch && portalMatch && companyMatch && countryMatch) ? "" : "none";
                     }
                 }
             }
 
-            // Column Sorting Logic
+            function resetFilters() {
+                document.getElementById("engineFilter").value = "all";
+                document.getElementById("portalFilter").value = "all";
+                document.getElementById("companyFilter").value = "all";
+                document.getElementById("countryFilter").value = "all";
+                applyFilters();
+            }
+
             function sortTable(n) {
                 let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
                 table = document.getElementById("jobTable");
@@ -109,16 +362,15 @@
                         shouldSwitch = false;
                         x = rows[i].getElementsByTagName("TD")[n];
                         y = rows[i + 1].getElementsByTagName("TD")[n];
-                        
+
                         let xVal = x.textContent.trim().toLowerCase();
                         let yVal = y.textContent.trim().toLowerCase();
-                        
-                        // Treat S.No as numeric so 10 doesn't come before 2
+
                         if (n === 0) {
                             xVal = parseInt(xVal) || 0;
                             yVal = parseInt(yVal) || 0;
                         }
-                        
+
                         if (dir == "asc") {
                             if (xVal > yVal) { shouldSwitch = true; break; }
                         } else if (dir == "desc") {
