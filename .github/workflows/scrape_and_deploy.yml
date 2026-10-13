@@ -29,7 +29,7 @@ jobs:
       - name: Run Job Scraper
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }} 
-        run: python scraper.py
+        run: python job_scraper.py
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -53,6 +53,6 @@ jobs:
             Your automated GCC Turbomachinery & Reliability job scraper has successfully finished running.
             
             You can view the latest updated job dashboard here:
-            https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY_NAME/
+            https://kiranvangari.github.io/gcc-opportunities/
             
             This is an automated notification sent from your GitHub Actions workflow.
